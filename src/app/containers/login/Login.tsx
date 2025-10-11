@@ -41,7 +41,7 @@ export const Login = () => {
                 showConfirmButton: false,
             });
             setTimeout(() => {
-                window.location.href = `/dashboard/proyectos`;
+                window.location.href = `/dashboard/pasajes`;
                 // if (decoded?.user?.userType !== "admin") {
                 //     window.location.href = `/dashboard/proyectos`;
                 // } else {
