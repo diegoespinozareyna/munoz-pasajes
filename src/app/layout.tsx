@@ -16,10 +16,10 @@ const geistMono = Geist_Mono({
 export const metadata = {
   metadataBase: new URL(`https://${Apis.PROYECTCURRENT_NAMEDOMINIO2}.inmunoz.com`), // Aquí colocas tu dominio
   // metadataBase: new URL('http://localhost:3000'), // Aquí colocas tu dominio
-  title: "EVENTOS BIENES RAICES",
+  title: "VENTA DE PASAJES",
   description: Apis.NAME_PROYECT,
   openGraph: {
-    title: "EVENTOS BIENES RAICES",
+    title: "VISITA A PROYECTOS",
     description: Apis.NAME_PROYECT,
     // url: 'https://inmobackend.site',
     url: `https://${Apis.PROYECTCURRENT_NAMEDOMINIO2}.inmunoz.com`,
@@ -30,7 +30,7 @@ export const metadata = {
         , // Next.js ahora resolverá automáticamente la URL completa
         width: 1200,
         height: 630,
-        alt: 'Vista previa de Eventos Muñoz Oficial'
+        alt: 'Vista previa de Pasajes Muñoz Oficial'
       }
     ]
   }
