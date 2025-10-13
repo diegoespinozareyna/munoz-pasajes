@@ -2,7 +2,7 @@
 
 import { Apis } from "@/app/configs/proyecto/proyectCurrent"
 import useApi from "@/app/hooks/fetchData/useApi"
-import { Autocomplete, Button, IconButton, TextField } from "@mui/material"
+import { Accordion, AccordionDetails, AccordionSummary, Autocomplete, Button, IconButton, TextField, Typography } from "@mui/material"
 import { useParams, useRouter } from "next/navigation"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { Controller, set, useFieldArray, useForm } from "react-hook-form"
@@ -12,7 +12,7 @@ import { Evento250Sale } from "@/app/components/Escenarios/Evento250/Evento250Sa
 import { Evento300Sale } from "@/app/components/Escenarios/Evento300/Evento300Sale"
 import Swal from "sweetalert2"
 import { StatusLotes } from "@/app/configs/proyecto/statusLotes"
-import { ChevronsLeft, Circle, CircuitBoard, Edit2Icon, File, FileText, Octagon, OctagonIcon, SquaresExclude, Upload, X } from "lucide-react"
+import { ArrowDown, ArrowUp, ChevronsLeft, Circle, CircuitBoard, Edit2Icon, File, FileText, Octagon, OctagonIcon, SquaresExclude, Upload, X } from "lucide-react"
 import { changeDecimales } from "@/app/functions/changeDecimales"
 import { usePopUp } from "@/app/hooks/popup/usePopUp"
 import Image from "next/image"
@@ -30,6 +30,8 @@ import { handleApiReniec } from "@/app/functions/handleApiReniec"
 import { handleApiReniec2 } from "@/app/functions/handleApiReniec2"
 import { useUserStore } from "@/app/store/userStore"
 import { Bus502 } from "@/app/components/sprinterssvg/Bus502"
+import { Bus149 } from "@/app/components/sprinterssvg/Bus149"
+import { Bus5098 } from "@/app/components/sprinterssvg/Bus5098"
 // import { jsPDF } from "jspdf";
 // import "jspdf-autotable";
 
@@ -83,11 +85,11 @@ export default function Eventos() {
     const [open, setOpen] = useState(false)
     const [dataAsientos, setDataAsientos] = useState<any>(null)
     const [dataAsientosComprados, setDataAsientosComprados] = useState<any>(null)
-    const [idAgregante, setIdAgregante] = useState<any>(2)
-    const [valorRef, setValorRef] = useState<any>(2)
+    const [idAgregante, setIdAgregante] = useState<any>(1)
+    const [valorRef, setValorRef] = useState<any>(1)
     const [change1, setChange1] = useState(false)
     const [arrAsientoSeleccionados, setArrAsientoSeleccionados] = useState<any>([])
-    const [getInitialStateFirstAsiento, setGetInitialStateFirstAsiento] = useState(2)
+    const [getInitialStateFirstAsiento, setGetInitialStateFirstAsiento] = useState(1)
 
     useEffect(() => {
         console.log("arrAsientoSeleccionados: ", arrAsientoSeleccionados)
@@ -143,8 +145,8 @@ export default function Eventos() {
             console.log("matchAll: ", matchAll)
             paths.forEach((obj1: any) => {
                 const match = response?.data?.find((obj2: any) => obj2?.codAsiento === obj1?.id && obj2?.status !== "3");
-                setGetInitialStateFirstAsiento((matchAll + 2))
-                setValorRef((matchAll + 2))
+                setGetInitialStateFirstAsiento((matchAll + 1))
+                setValorRef((matchAll + 1))
                 const hoy = new Date();
                 const fechaFin = new Date(match?.fechaFin); // Asegúrate de que sea Date
                 // console.log("fechaFin: ", fechaFin)
@@ -192,15 +194,15 @@ export default function Eventos() {
                 //     obj1?.setAttribute('stroke', '#f00');
                 //     obj1?.setAttribute('stroke-width', '0.3')
                 // }
-                else if (Number(obj1?.id?.split("-")[1]) == 1) {
-                    // console.log("arrAsientoSeleccionados", arrAsientoSeleccionados)
-                    // console.log("obj1?.id", obj1?.id)
-                    // console.log("valorRef", valorRef)
-                    obj1?.setAttribute('fill', "#aaa"); // plomo asiento no disponible
-                    obj1?.setAttribute('stroke', '#333');
-                    obj1?.setAttribute('stroke-width', '0.3')
-                }
-                else if (Number(obj1?.id?.split("-")[1]) == (matchAll + 2) && Number(obj1?.id?.split("-")[1]) != 1) {
+                // else if (Number(obj1?.id?.split("-")[1]) == 1) {
+                //     // console.log("arrAsientoSeleccionados", arrAsientoSeleccionados)
+                //     // console.log("obj1?.id", obj1?.id)
+                //     // console.log("valorRef", valorRef)
+                //     obj1?.setAttribute('fill', "#aaa"); // plomo asiento no disponible
+                //     obj1?.setAttribute('stroke', '#333');
+                //     obj1?.setAttribute('stroke-width', '0.3')
+                // }
+                else if (Number(obj1?.id?.split("-")[1]) == (matchAll + 1)) {
                     // console.log("arrAsientoSeleccionados", arrAsientoSeleccionados)
                     // console.log("obj1?.id", obj1?.id)
                     // console.log("valorRef", valorRef)
@@ -268,12 +270,12 @@ export default function Eventos() {
                     obj1?.setAttribute('stroke', '#00f');
                     obj1?.setAttribute('stroke-width', '0.7')
                 }
-                else if (Number(obj1?.id?.split("-")[1]) == 1) {
-                    obj1?.setAttribute('fill', "#aaa"); // plomo asiento no disponible
-                    obj1?.setAttribute('stroke', '#333');
-                    obj1?.setAttribute('stroke-width', '0.3')
-                }
-                else if (Number(obj1?.id?.split("-")[1]) == valorRef && Number(obj1?.id?.split("-")[1]) != 1) {
+                // else if (Number(obj1?.id?.split("-")[1]) == 1) {
+                //     obj1?.setAttribute('fill', "#aaa"); // plomo asiento no disponible
+                //     obj1?.setAttribute('stroke', '#333');
+                //     obj1?.setAttribute('stroke-width', '0.3')
+                // }
+                else if (Number(obj1?.id?.split("-")[1]) == valorRef) {
                     obj1?.setAttribute('fill', "#fff"); // blanco asiento disponible
                     obj1?.setAttribute('stroke', '#000');
                     obj1?.setAttribute('stroke-width', '0.6')
@@ -899,124 +901,6 @@ export default function Eventos() {
         saveAs(blob, "reporte.xlsx");
     };
 
-    // const formatPrice = (p: any) => {
-    //     const n = Number(p) || 0;
-    //     return n.toFixed(2);
-    // };
-
-    // const handleDownloadPDF = (dataAsientosComprados: AsientoRaw[] | undefined) => {
-    //     // 1) preparar datos filtrados
-    //     const cleanData = (dataAsientosComprados ?? [])
-    //         .filter((x: any) => x?.status === "1")
-    //         .map((item: any) => ({
-    //             Documento: item.documentoUsuario ?? "",
-    //             Nombres: item.nombres ?? "",
-    //             Paterno: item.apellidoPaterno ?? "",
-    //             Materno: item.apellidoMaterno ?? "",
-    //             Celular: item.celular || "",
-    //             Asiento: item.codAsiento?.split("-")[1] ?? "",
-    //             Precio: formatPrice(item.precio),
-    //             "Grupo de Asientos": item.grupoAsientosComprados
-    //                 ? item.grupoAsientosComprados.split(",").map((x: string) => x.split("-")[1]).join(", ")
-    //                 : "",
-    //             RegistroPor: item.usuarioRegistro ?? "",
-    //             FechaFin: item.fechaFin ?? "",
-    //             FechaCreacion: item.createdAt ?? "",
-    //             Estado:
-    //                 item.status == "0"
-    //                     ? "Pendiente Pago"
-    //                     : item.status == "1"
-    //                         ? "Vendido"
-    //                         : item.status == "2"
-    //                             ? "Liberado"
-    //                             : "Bloqueado",
-    //             "¿Pasarela?": item.isPasarela ? "Sí" : "No",
-    //             "¿Compra Asesor/Invitado?": item.compraUserAntiguo ? "Asesor" : "Invitado",
-    //             Vouchers: Array.isArray(item.fileUrl) ? item.fileUrl.join(", ") : item.fileUrl || "",
-    //         }));
-
-    //     // 2) crear doc
-    //     const doc = new jsPDF({
-    //         orientation: "landscape", // más ancho para muchas columnas
-    //         unit: "pt",
-    //         format: "a4",
-    //     });
-
-    //     const title = "Visita a proyecto";
-    //     const fecha = new Date().toLocaleString(); // si quieres fecha en título, usa `${title} - ${fecha}`
-    //     const pageWidth = doc.internal.pageSize.getWidth();
-
-    //     // Título (centrado)
-    //     doc.setFontSize(18);
-    //     doc.setFont("helvetica", "bold");
-    //     doc.text(title, pageWidth / 2, 40, { align: "center" });
-    //     doc.setFontSize(10);
-    //     doc.setFont("helvetica", "normal");
-    //     doc.text(`Generado: ${fecha}`, pageWidth - 40, 40, { align: "right" });
-
-    //     // si no hay datos, generar PDF con solo título
-    //     if (cleanData.length === 0) {
-    //         doc.setFontSize(12);
-    //         doc.text("No hay registros para mostrar.", pageWidth / 2, 120, { align: "center" });
-    //         doc.save("reporte.pdf");
-    //         return;
-    //     }
-
-    //     // 3) preparar headers y rows para autoTable
-    //     const headers = Object.keys(cleanData[0]).map((k) => ({ header: k, dataKey: k }));
-
-    //     const body = cleanData.map((row) => {
-    //         // asegúrate que las celdas sean string o number
-    //         const mapped: Record<string, string | number> = {};
-    //         for (const key of Object.keys(row)) {
-    //             mapped[key] = (row as Record<string, any>)[key] ?? "";
-    //         }
-    //         return mapped;
-    //     });
-
-    //     // 4) configurar autoTable
-    //     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    //     // @ts-ignore - autoTable no está en los tipos de jsPDF por defecto en algunas versiones
-    //     (doc as any).autoTable({
-    //         startY: 70, // debajo del título
-    //         head: [headers.map((h) => h.header)],
-    //         body: body.map((r) => Object.values(r)),
-    //         styles: {
-    //             fontSize: 9,
-    //             cellPadding: 6,
-    //         },
-    //         headStyles: {
-    //             fillColor: [22, 78, 159], // azulish
-    //             textColor: 255,
-    //             halign: "center",
-    //             valign: "middle",
-    //             fontStyle: "bold",
-    //         },
-    //         alternateRowStyles: {
-    //             fillColor: [245, 245, 245],
-    //         },
-    //         columnStyles: {
-    //             // por ejemplo, ajustar ancho para columna Precio o Documento
-    //             5: { cellWidth: 40 }, // Asiento (ajusta según posición de columna)
-    //             // puedes mapear dinámicamente si conoces índices
-    //         },
-    //         // margin: { top: 70, left: 20, right: 20, bottom: 40 },
-    //         didDrawPage: (dataArg: any) => {
-    //             // cabecera adicional / pie de página si quieres
-    //             const page = doc.getNumberOfPages();
-    //             doc.setFontSize(9);
-    //             doc.text(`Página ${page}`, pageWidth - 40, doc.internal.pageSize.getHeight() - 10, {
-    //                 align: "right",
-    //             });
-    //         },
-    //         // opciones de paginado y overflow automáticas
-    //         showHead: "everyPage",
-    //     });
-
-    //     // 5) guardar pdf
-    //     doc.save("reporte.pdf");
-    // };
-
     useEffect(() => {
         setValue("sumaTotalPago", getValues()?.asientos?.reduce((acum: any, item: any) => {
             return Number(acum) + Number(item.precio)
@@ -1322,22 +1206,25 @@ export default function Eventos() {
                     true &&
                     <div
                         className="bg-cover bg-center flex flex-col -mt-3 w-full"
-                        style={{ backgroundImage: "url('/fondopasajes (1).jpg')" }}
+                    // style={{ backgroundImage: "url('/fondopasajes (1).jpg')" }}
                     >
-                        <div>
-                            <button className="bg-blue-500 text-white px-2 py-2 relative z-20 font-bold text-xl cursor-pointer rounded-lg ml-0 mt-2 flex justify-center items-center"
-                                onClick={() => {
-                                    router.push(`/dashboard/pasajes`)
-                                }}
-                            >
-                                <ChevronsLeft
-                                    color={"#fff"}
-                                />
-                            </button>
-                        </div>
+                        {
+                            (usuarioActivo?.role == "admin" || usuarioActivo?.role == "super admin" || usuarioActivo?.role == "super admin") &&
+                            <div>
+                                <button className="bg-blue-500 text-white px-2 py-2 relative z-20 font-bold text-xl cursor-pointer rounded-lg ml-0 mt-2 flex justify-center items-center"
+                                    onClick={() => {
+                                        router.push(`/dashboard/pasajes`)
+                                    }}
+                                >
+                                    <ChevronsLeft
+                                        color={"#fff"}
+                                    />
+                                </button>
+                            </div>
+                        }
                         <>
                             <div className='flex flex-col bg-cover bg-center justify-start items-center gap-4 p-4 w-full px-1 overflow-y-auto'
-                                style={{ backgroundImage: "url('/fondopasajes (1).jpg')" }}
+                            // style={{ backgroundImage: "url('/fondopasajes (1).jpg')" }}
                             >
                                 <div className='flex flex-col justify-center items-center w-full md:w-full max-w-4xl gap-4'>
                                     <div className='flex flex-col gap-1 justify-center items-center'>
@@ -1485,39 +1372,128 @@ export default function Eventos() {
                                                         </h1>
                                                     </div>
                                                 </div>
-                                                <div className='flex justify-center items-center gap-0'>
+                                                {/* <div className='flex justify-center items-center gap-0'>
                                                     <div className='scale-110 bg-white p-1'>
                                                         🚌{`Ocupados: ${dataAsientosComprados?.filter((x: any) => x?.status == "1")?.length}/50`}
                                                     </div>
                                                     <div>
-                                                        {/* <button className='bg-blue-400 text-white rounded-lg px-2 py-1 font-semibold'>
-                                                                Activo
-                                                            </button> */}
                                                     </div>
-                                                </div>
+                                                </div> */}
                                             </div>
                                             <div className="text-center text-xs text-red-500 font-bold uppercase">
                                                 {"Seleccione asientos Disponibles (Blancos) *"}
                                             </div>
                                             <form className="relative" onSubmit={handleSubmit(onValid, onInvalid)}>
-                                                <div className='relative w-full h-full grid grid-cols-1 md:grid-cols-2 gap-2 justify-between'>
+                                                <div className='relative w-full h-full grid grid-cols-1 md:grid-cols-2 gap-2'>
                                                     {/* asientos svgx */}
                                                     {/* {
                                                         dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length <= 48 && */}
-                                                    <div>
-                                                        <div className='relative w-full h-[1220px] md:h-[1120px] md:w-[450px] border border-slate-300 rounded-md'>
-                                                            <Bus50 {...{ handleClickInformation }} />
-                                                        </div>
+                                                    <div className="flex flex-col gap-2">
+                                                        <Accordion
+                                                            disabled={(usuarioActivo?.role == "admin" || usuarioActivo?.role == "super admin") ? false : true}
+                                                            defaultExpanded={dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length <= 48 ? true : false}
+                                                        >
+                                                            <AccordionSummary
+                                                                expandIcon={<ArrowDown style={{ display: (usuarioActivo?.role == "admin" || usuarioActivo?.role == "super admin") ? "block" : "none" }} className="rounded-full bg-slate-300 h-6 w-6 p-1" />}
+                                                                aria-controls="panel1-content"
+                                                                id="panel1-header"
+                                                            >
+                                                                <Typography className="!text-lg !font-bold" component="span">Bus 1</Typography>
+                                                            </AccordionSummary>
+                                                            <AccordionDetails>
+                                                                <div>
+                                                                    <div className='relative w-full h-[1220px] md:h-[900px] md:w-[400px] border border-slate-300 rounded-md'>
+                                                                        <Bus149 {...{ handleClickInformation }} />
+                                                                    </div>
+                                                                </div>
+                                                            </AccordionDetails>
+                                                        </Accordion>
+                                                        {/* } */}
+                                                        {
+                                                            (dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length >= 49 && dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length <= 96) &&
+                                                            <Accordion
+                                                                disabled={(usuarioActivo?.role == "admin" || usuarioActivo?.role == "super admin") ? false : true}
+                                                                defaultExpanded={dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length >= 49 && dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length <= 97 ? true : false}>
+                                                                <AccordionSummary
+                                                                    expandIcon={<ArrowDown style={{ display: (usuarioActivo?.role == "admin" || usuarioActivo?.role == "super admin") ? "block" : "none" }} className="rounded-full bg-slate-300 h-6 w-6 p-1" />}
+                                                                    aria-controls="panel1-content"
+                                                                    id="panel1-header"
+                                                                >
+                                                                    <Typography className="!text-lg !font-bold" component="span">Bus 2</Typography>
+                                                                </AccordionSummary>
+                                                                <AccordionDetails>
+                                                                    <div>
+                                                                        <div className='relative w-full h-[1220px] md:h-[900px] md:w-[400px] border border-slate-300 rounded-md'>
+                                                                            <Bus5098 {...{ handleClickInformation }} />
+                                                                        </div>
+                                                                    </div>
+                                                                </AccordionDetails>
+                                                            </Accordion>
+                                                        }
+                                                        {
+                                                            (dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length >= 98 && dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length <= 145) &&
+                                                            <Accordion
+                                                                disabled={(usuarioActivo?.role == "admin" || usuarioActivo?.role == "super admin") ? false : true}
+                                                                defaultExpanded={dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length >= 98 && dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length <= 145 ? true : false}>
+                                                                <AccordionSummary
+                                                                    expandIcon={<ArrowDown style={{ display: (usuarioActivo?.role == "admin" || usuarioActivo?.role == "super admin") ? "block" : "none" }} className="rounded-full bg-slate-300 h-6 w-6 p-1" />}
+                                                                    aria-controls="panel1-content"
+                                                                    id="panel1-header"
+                                                                >
+                                                                    <Typography className="!text-lg !font-bold" component="span">Bus 3</Typography>
+                                                                </AccordionSummary>
+                                                                <AccordionDetails>
+                                                                    <div>
+                                                                        <div className='relative w-full h-[1220px] md:h-[900px] md:w-[400px] border border-slate-300 rounded-md'>
+                                                                            <Bus5098 {...{ handleClickInformation }} />
+                                                                        </div>
+                                                                    </div>
+                                                                </AccordionDetails>
+                                                            </Accordion>
+                                                        }
+                                                        {
+                                                            (dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length >= 146 && dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length <= 193) &&
+                                                            <Accordion
+                                                                disabled={(usuarioActivo?.role == "admin" || usuarioActivo?.role == "super admin") ? false : true}
+                                                                defaultExpanded={dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length >= 146 && dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length <= 193 ? true : false}>
+                                                                <AccordionSummary
+                                                                    expandIcon={<ArrowDown style={{ display: (usuarioActivo?.role == "admin" || usuarioActivo?.role == "super admin") ? "block" : "none" }} className="rounded-full bg-slate-300 h-6 w-6 p-1" />}
+                                                                    aria-controls="panel1-content"
+                                                                    id="panel1-header"
+                                                                >
+                                                                    <Typography className="!text-lg !font-bold" component="span">Bus 4</Typography>
+                                                                </AccordionSummary>
+                                                                <AccordionDetails>
+                                                                    <div>
+                                                                        <div className='relative w-full h-[1220px] md:h-[900px] md:w-[400px] border border-slate-300 rounded-md'>
+                                                                            <Bus5098 {...{ handleClickInformation }} />
+                                                                        </div>
+                                                                    </div>
+                                                                </AccordionDetails>
+                                                            </Accordion>
+                                                        }
+                                                        {
+                                                            (dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length >= 194 && dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length <= 241) &&
+                                                            <Accordion
+                                                                disabled={(usuarioActivo?.role == "admin" || usuarioActivo?.role == "super admin") ? false : true}
+                                                                defaultExpanded={dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length >= 194 && dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length <= 241 ? true : false}>
+                                                                <AccordionSummary
+                                                                    expandIcon={<ArrowDown style={{ display: (usuarioActivo?.role == "admin" || usuarioActivo?.role == "super admin") ? "block" : "none" }} className="rounded-full bg-slate-300 h-6 w-6 p-1" />}
+                                                                    aria-controls="panel1-content"
+                                                                    id="panel1-header"
+                                                                >
+                                                                    <Typography className="!text-lg !font-bold" component="span">Bus 5</Typography>
+                                                                </AccordionSummary>
+                                                                <AccordionDetails>
+                                                                    <div>
+                                                                        <div className='relative w-full h-[1220px] md:h-[900px] md:w-[400px] border border-slate-300 rounded-md'>
+                                                                            <Bus5098 {...{ handleClickInformation }} />
+                                                                        </div>
+                                                                    </div>
+                                                                </AccordionDetails>
+                                                            </Accordion>
+                                                        }
                                                     </div>
-                                                    {/* } */}
-                                                    {/* {
-                                                        (dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length >= 49 && dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length <= 96) &&
-                                                        <div>
-                                                            <div className='relative w-full h-[1220px] md:h-[1120px] md:w-[450px] border border-slate-300 rounded-md'>
-                                                                <Bus502 {...{ handleClickInformation }} />
-                                                            </div>
-                                                        </div>
-                                                    } */}
                                                     <div className="flex flex-col gap-3 justify-start items-center">
                                                         Asientos Seleccionados:
                                                         {
