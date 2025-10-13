@@ -29,6 +29,7 @@ import { Bus50 } from "@/app/components/sprinterssvg/Bus50"
 import { handleApiReniec } from "@/app/functions/handleApiReniec"
 import { handleApiReniec2 } from "@/app/functions/handleApiReniec2"
 import { useUserStore } from "@/app/store/userStore"
+import { Bus502 } from "@/app/components/sprinterssvg/Bus502"
 // import { jsPDF } from "jspdf";
 // import "jspdf-autotable";
 
@@ -91,6 +92,15 @@ export default function Eventos() {
     useEffect(() => {
         console.log("arrAsientoSeleccionados: ", arrAsientoSeleccionados)
     }, [arrAsientoSeleccionados])
+    useEffect(() => {
+        console.log("dataAsientosComprados: ", dataAsientosComprados)
+    }, [dataAsientosComprados])
+    useEffect(() => {
+        console.log("valorRef: ", valorRef)
+    }, [valorRef])
+    useEffect(() => {
+        console.log("getInitialStateFirstAsiento: ", getInitialStateFirstAsiento)
+    }, [getInitialStateFirstAsiento])
 
     const usersPatrocinaddores = async () => {
         const url = `${Apis.URL_APOIMENT_BACKEND_DEV}/api/users/getUsersPatrocinadores`
@@ -133,8 +143,8 @@ export default function Eventos() {
             console.log("matchAll: ", matchAll)
             paths.forEach((obj1: any) => {
                 const match = response?.data?.find((obj2: any) => obj2?.codAsiento === obj1?.id && obj2?.status !== "3");
-                setGetInitialStateFirstAsiento(matchAll + 2)
-                setValorRef(matchAll + 2)
+                setGetInitialStateFirstAsiento((matchAll + 2))
+                setValorRef((matchAll + 2))
                 const hoy = new Date();
                 const fechaFin = new Date(match?.fechaFin); // Asegúrate de que sea Date
                 // console.log("fechaFin: ", fechaFin)
@@ -264,7 +274,7 @@ export default function Eventos() {
                     obj1?.setAttribute('stroke-width', '0.3')
                 }
                 else if (Number(obj1?.id?.split("-")[1]) == valorRef && Number(obj1?.id?.split("-")[1]) != 1) {
-                    obj1?.setAttribute('fill', "#fff"); // amarillo claro asiento disponible
+                    obj1?.setAttribute('fill', "#fff"); // blanco asiento disponible
                     obj1?.setAttribute('stroke', '#000');
                     obj1?.setAttribute('stroke-width', '0.6')
                 }
@@ -283,7 +293,7 @@ export default function Eventos() {
     useEffect(() => {
         fetchAsientosIdMatrix()
         // usersPatrocinaddores()
-    }, [info])
+    }, [info, getInitialStateFirstAsiento])
 
     useEffect(() => {
         fetchAsientosIdMatrix2()
@@ -401,7 +411,7 @@ export default function Eventos() {
                         apellidoPaterno: null,
                         apellidoMaterno: null,
                         celular: null,
-                        email: null,
+                        // email: null,
                         codAsiento: codAsiento, // numero de asiento
                         precio: info?.precioAsiento,
                         codMatrixTicket: info?._id, // codigo id de evento
@@ -553,7 +563,7 @@ export default function Eventos() {
                 apellidoPaterno: item.apellidoPaterno,
                 apellidoMaterno: item.apellidoMaterno,
                 celular: item.celular,
-                email: item.email,
+                // email: item.email,
                 codAsiento: item.codAsiento, // numero de asiento
                 precio: item.precio,
                 codMatrixTicket: item.codMatrixTicket, // codigo id de evento
@@ -774,25 +784,36 @@ export default function Eventos() {
         // setLoading(false);
     };
 
+    const paraderos = [
+        { value: 1, label: "Orbes" },
+        { value: 2, label: "Tottus Atocongo" },
+        { value: 3, label: "Parque Zonal" },
+        { value: 4, label: "Puente San Luis" },
+        { value: 5, label: "Km. 40" },
+        { value: 6, label: "Pucusana" },
+        { value: 7, label: "Ñaña" },
+        { value: 8, label: "Tottus Puente Piedra" },
+    ]
+
     const handleDownload = () => {
         const cleanData = dataAsientosComprados
             ?.filter((X: any) => X?.status === "1")
             .map((item: any) => ({
-                Documento: item.documentoUsuario,
-                Nombres: item.nombres,
-                Paterno: item.apellidoPaterno,
-                Materno: item.apellidoMaterno,
-                Celular: item.celular || "",
-                Asiento: item.codAsiento?.split("-")[1],
+                "Proyecto Visita": info?.destino == 1 ? "Miraflores del Norte 1" : info?.destino == 0 ? "Paracas" : "Paracas",
+                "Fecha Salida": moment.tz(info?.fechaVisita, "America/Lima").format("DD/MM/YYYY"),
+                invitado: `DNI: ${item.documentoUsuario ?? ""} - ${item.nombres ?? ""} ${item.apellidoPaterno ?? ""} ${item.apellidoMaterno ?? ""} - Cel: ${item.celular ?? ""}`,
                 Precio: item.precio,
+                Asiento: item.codAsiento?.split("-")[1],
                 "Grupo de Asientos":
                     (item.grupoAsientosComprados?.includes("Fue editado único:"))
                         ? item.grupoAsientosComprados
                         :
                         item.grupoAsientosComprados?.split(",").map((x: any) => x.split("-")[1]).join(", "),
+                Paradero: paraderos.find((x: any) => x.value == item.paradero)?.label ?? "No definido",
+                Patrocinador: getValues()?.patrocinadorId?.label ?? item.usuarioRegistro,
                 RegistroPor: item.usuarioRegistro,
-                FechaFin: item.fechaFin,
-                FechaCreacion: item.createdAt,
+                // FechaFin: item.fechaFin,
+                // FechaCreacion: item.createdAt,
                 Estado:
                     item.status == "0"
                         ? "Pendiente Pago"
@@ -1099,7 +1120,7 @@ export default function Eventos() {
                                     apellidoPaterno: " ",
                                     apellidoMaterno: " ",
                                     celular: " ",
-                                    email: " ",
+                                    // email: " ",
                                     fileUrl: " ",
                                     grupoAsientosComprados: " ",
                                 }
@@ -1152,7 +1173,6 @@ export default function Eventos() {
                             <p><b>DNI:</b> ${asientoSelect.documentoUsuario}</p>
                             <p><b>Cliente:</b> ${asientoSelect.nombres} ${asientoSelect.apellidoPaterno} ${asientoSelect.apellidoMaterno}</p>
                             <p><b>Celular:</b> ${asientoSelect.celular}</p>
-                            <p><b>Email:</b> ${asientoSelect.email}</p>
                             <p><b>Precio:</b> S/. ${changeDecimales(asientoSelect.precio)}</p>
                             <p><b>Grupo de asientos:</b> ${asientoSelect.grupoAsientosComprados?.split(',').map((x: any) => x.split('-')[1]).join(', ')}</p>
                             <p><b>Voucher subido:</b></p>
@@ -1199,7 +1219,7 @@ export default function Eventos() {
                         apellidoPaterno: getValues()?.apellidoPaterno ?? "",
                         apellidoMaterno: getValues()?.apellidoMaterno ?? "",
                         celular: getValues()?.celular ?? "",
-                        email: getValues()?.email ?? "",
+                        // email: getValues()?.email ?? "",
                         fileUrl: res.data.url,
                         grupoAsientosComprados: `Fue editado único: ${valorAsientoPatch?.codAsiento?.split("-")[1]}`,
                     }
@@ -1252,7 +1272,7 @@ export default function Eventos() {
                     apellidoPaterno: getValues()?.apellidoPaterno ?? "",
                     apellidoMaterno: getValues()?.apellidoMaterno ?? "",
                     celular: getValues()?.celular ?? "",
-                    email: getValues()?.email ?? "",
+                    // email: getValues()?.email ?? "",
                 }
                 console.log("jsonAsientosAll: ", jsonAsientosAll)
 
@@ -1292,11 +1312,18 @@ export default function Eventos() {
     }
 
     return (
-        <div className="bg-blue-500 h-[100vh]">
-            <div className="!max-w-full relative z-20 w-full flex items-center justify-center bg-blue-500">
+        <div className="bg-cover bg-center h-[100vh]">
+            <div
+                className="!max-w-full relative z-20 w-full flex items-center justify-center bg-cover bg-center"
+                // className="flex flex-col gap-4 justify-center items-center bg-cover bg-center rounded-lg px-3 py-2 pb-20"
+                style={{ backgroundImage: "url('/fondopasajes (1).jpg')" }}
+            >
                 {
                     true &&
-                    <div className="bg-blue-500 flex flex-col -mt-3 w-full">
+                    <div
+                        className="bg-cover bg-center flex flex-col -mt-3 w-full"
+                        style={{ backgroundImage: "url('/fondopasajes (1).jpg')" }}
+                    >
                         <div>
                             <button className="bg-blue-500 text-white px-2 py-2 relative z-20 font-bold text-xl cursor-pointer rounded-lg ml-0 mt-2 flex justify-center items-center"
                                 onClick={() => {
@@ -1309,7 +1336,9 @@ export default function Eventos() {
                             </button>
                         </div>
                         <>
-                            <div className='flex flex-col bg-blue-500 justify-start items-center gap-4 p-4 w-full px-1 overflow-y-auto'>
+                            <div className='flex flex-col bg-cover bg-center justify-start items-center gap-4 p-4 w-full px-1 overflow-y-auto'
+                                style={{ backgroundImage: "url('/fondopasajes (1).jpg')" }}
+                            >
                                 <div className='flex flex-col justify-center items-center w-full md:w-full max-w-4xl gap-4'>
                                     <div className='flex flex-col gap-1 justify-center items-center'>
                                         <h1 className='text-center text-white text-2xl font-bold'>
@@ -1330,7 +1359,7 @@ export default function Eventos() {
                                             <div className='flex w-full flex-col md:flex-row gap-1 justify-center items-center bg-white rounded-lg px-3 py-2'>
                                                 <div className='flex flex-row gap-2 w-full px-2 py-1 border rounded-lg border-green-100 bg-green-50'>
                                                     <div>
-                                                        Total Pasajeros:
+                                                        Total_Pasajeros:
                                                     </div>
                                                     <div className='font-bold text-green-400'>
                                                         {`${dataAsientosComprados?.filter((x: any) => x?.status == "1")?.length}`}
@@ -1338,7 +1367,7 @@ export default function Eventos() {
                                                 </div>
                                                 <div className='flex flex-row gap-2 w-full px-2 py-1 border rounded-lg border-blue-100 bg-blue-50'>
                                                     <div>
-                                                        {"Bus 10:"}
+                                                        {"Sprinter10:"}
                                                     </div>
                                                     <div className='font-bold text-blue-400'>
                                                         {`${dataAsientosComprados?.filter((x: any) => x?.status == "1")?.length <= 10 ? "1" : "0"}`}
@@ -1346,7 +1375,7 @@ export default function Eventos() {
                                                 </div>
                                                 <div className='flex flex-row gap-2 w-full px-2 py-1 border rounded-lg border-blue-100 bg-blue-50'>
                                                     <div>
-                                                        {"Buses 17:"}
+                                                        {"Sprinter17:"}
                                                     </div>
                                                     <div className='font-bold text-blue-400'>
                                                         {`${dataAsientosComprados?.filter((x: any) => x?.status == "1")?.length >= 11 && dataAsientosComprados?.filter((x: any) => x?.status == "1")?.length <= 17 ? "1" : "0"}`}
@@ -1354,7 +1383,7 @@ export default function Eventos() {
                                                 </div>
                                                 <div className='flex flex-row gap-2 w-full px-2 py-1 border rounded-lg border-blue-100 bg-blue-50'>
                                                     <div>
-                                                        {"Buses 20:"}
+                                                        {"Sprinter20:"}
                                                     </div>
                                                     <div className='font-bold text-blue-400'>
                                                         {`${dataAsientosComprados?.filter((x: any) => x?.status == "1")?.length >= 18 && dataAsientosComprados?.filter((x: any) => x?.status == "1")?.length <= 20 ? "1" : "0"}`}
@@ -1362,7 +1391,7 @@ export default function Eventos() {
                                                 </div>
                                                 <div className='flex flex-row gap-2 w-full px-2 py-1 border rounded-lg border-blue-100 bg-blue-50'>
                                                     <div>
-                                                        {"Buses 30:"}
+                                                        {"Bus30:"}
                                                     </div>
                                                     <div className='font-bold text-blue-400'>
                                                         {`${dataAsientosComprados?.filter((x: any) => x?.status == "1")?.length >= 21 && dataAsientosComprados?.filter((x: any) => x?.status == "1")?.length <= 30 ? "1" : "0"}`}
@@ -1370,7 +1399,7 @@ export default function Eventos() {
                                                 </div>
                                                 <div className='flex flex-row gap-2 w-full px-2 py-1 border rounded-lg border-blue-100 bg-blue-50'>
                                                     <div>
-                                                        {"Buses 50:"}
+                                                        {"Bus50:"}
                                                     </div>
                                                     <div className='font-bold text-blue-400'>
                                                         {`${dataAsientosComprados?.filter((x: any) => x?.status == "1")?.length >= 31 && dataAsientosComprados?.filter((x: any) => x?.status == "1")?.length <= 50 ? "1" : "0"}`}
@@ -1383,7 +1412,7 @@ export default function Eventos() {
                                                     <div onClick={handleDownload} className='font-bold text-green-400 flex justify-start items-center gap-2'>
                                                         <File className="h-5 w-5 text-green-400" />
                                                         <div>
-                                                            Excel Pasajeros
+                                                            Excel_Pasajeros
                                                         </div>
                                                     </div>
                                                 </div>
@@ -1401,7 +1430,8 @@ export default function Eventos() {
 
                                     {/* asientosBuses */}
                                     <div id='asientosBuses' className='flex flex-col w-full gap-2'>
-                                        <div className='flex flex-col gap-4 justify-center items-center bg-white rounded-lg px-3 py-2 pb-20'>
+                                        <div
+                                            className='flex flex-col gap-4 justify-center items-center bg-[rgba(255,255,255,0.8)] rounded-lg px-3 py-2 pb-20'>
                                             <div className='flex w-full justify-between'>
                                                 <div className='flex justify-center items-center gap-4 mt-4'>
                                                     {/* <div className='scale-200 -mt-2'>
@@ -1472,12 +1502,22 @@ export default function Eventos() {
                                             <form className="relative" onSubmit={handleSubmit(onValid, onInvalid)}>
                                                 <div className='relative w-full h-full grid grid-cols-1 md:grid-cols-2 gap-2 justify-between'>
                                                     {/* asientos svgx */}
+                                                    {/* {
+                                                        dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length <= 48 && */}
                                                     <div>
                                                         <div className='relative w-full h-[1220px] md:h-[1120px] md:w-[450px] border border-slate-300 rounded-md'>
-                                                            {/* <Sprinter10 /> */}
                                                             <Bus50 {...{ handleClickInformation }} />
                                                         </div>
                                                     </div>
+                                                    {/* } */}
+                                                    {/* {
+                                                        (dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length >= 49 && dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length <= 96) &&
+                                                        <div>
+                                                            <div className='relative w-full h-[1220px] md:h-[1120px] md:w-[450px] border border-slate-300 rounded-md'>
+                                                                <Bus502 {...{ handleClickInformation }} />
+                                                            </div>
+                                                        </div>
+                                                    } */}
                                                     <div className="flex flex-col gap-3 justify-start items-center">
                                                         Asientos Seleccionados:
                                                         {
@@ -1600,7 +1640,7 @@ export default function Eventos() {
                                                                                                 />
                                                                                             )}
                                                                                         />
-                                                                                        <Controller
+                                                                                        {/* <Controller
                                                                                             name={`asientos.${index}.email`}
                                                                                             control={control}
                                                                                             // rules={{
@@ -1631,7 +1671,7 @@ export default function Eventos() {
                                                                                                     }}
                                                                                                 />
                                                                                             )}
-                                                                                        />
+                                                                                        /> */}
                                                                                         <div className="w-full">
                                                                                             <Controller
                                                                                                 name={`asientos.${index}.paradero`}
@@ -1847,7 +1887,7 @@ export default function Eventos() {
                                                                                                 />
                                                                                             )}
                                                                                         />
-                                                                                        <Controller
+                                                                                        {/* <Controller
                                                                                             name={`asientos.${index}.email`}
                                                                                             control={control}
                                                                                             // rules={{
@@ -1878,7 +1918,7 @@ export default function Eventos() {
                                                                                                     }}
                                                                                                 />
                                                                                             )}
-                                                                                        />
+                                                                                        /> */}
                                                                                         <div className="w-full">
                                                                                             <Controller
                                                                                                 name={`asientos.${index}.paradero`}
@@ -2048,7 +2088,7 @@ export default function Eventos() {
                                     apellidoPaterno: null,
                                     apellidoMaterno: null,
                                     celular: null,
-                                    email: null,
+                                    // email: null,
                                     paradero: null,
                                 })
                             }}><X color="blue" /></div>
@@ -2142,7 +2182,7 @@ export default function Eventos() {
                                                 />
                                             )}
                                         />
-                                        <Controller
+                                        {/* <Controller
                                             name={`email`}
                                             control={control}
                                             rules={{
@@ -2173,7 +2213,7 @@ export default function Eventos() {
                                                     }}
                                                 />
                                             )}
-                                        />
+                                        /> */}
                                         <div className="w-full">
                                             <Controller
                                                 name={`paradero`}

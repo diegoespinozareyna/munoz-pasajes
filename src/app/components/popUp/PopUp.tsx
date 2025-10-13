@@ -327,8 +327,10 @@ export const PopUp = ({ onSubmit, handleSubmit, control, apiCall, loading, error
                                                 }}
                                                 onChange={(_, newValue) => {
                                                     field.onChange(newValue)
+                                                    setValue("patrocinadorCompleto", newValue)
                                                     if (newValue) {
                                                         setInputValue(newValue.label)
+                                                        setValue("patrocinadorCompleto", newValue)
                                                         setOptions([newValue])
                                                     } else {
                                                         setInputValue("")
