@@ -449,6 +449,7 @@ export default function Eventos() {
                     })
                 }
                 else {
+                    console.log("entre3", Number(codAsiento?.split("-")[1]))
                     append({
                         codAsiento: codAsiento, // numero de asiento
                         precio: info?.precioAsiento,
@@ -458,15 +459,22 @@ export default function Eventos() {
             }
         }
         else {
+            console.log("entre3", Number(codAsiento?.split("-")[1]))
             setValorRef(valorRef)
             setIdAgregante(codAsiento)
             setChange1(!change1)
             const asientoSelect = dataAsientosComprados.find((x: any) => x?.codAsiento == codAsiento)
             setValorAsientoPatch(asientoSelect)
             if (asientoSelect !== undefined && (usuarioActivo?.role == "admin" || usuarioActivo?.role == "super admin")) {
+                console.log("entre3", Number(codAsiento?.split("-")[1]))
+                handleEditAsiento(asientoSelect, codAsiento)
+            }
+            if (usuarioActivo?._id == asientoSelect?.patrocinadorId && (usuarioActivo?.role == "user asesor")) {
+                console.log("entre3", Number(codAsiento?.split("-")[1]))
                 handleEditAsiento(asientoSelect, codAsiento)
             }
             else if (usuarioActivo?._id !== asientoSelect?.patrocinadorId) {
+                console.log("entre3", Number(codAsiento?.split("-")[1]))
                 Swal.fire({
                     icon: "error",
                     title: "Error!",
@@ -474,6 +482,7 @@ export default function Eventos() {
                 });
             }
             else if (asientoSelect == "99" && (usuarioActivo?._id == asientoSelect?.patrocinadorId && asientoSelect?.status !== "1") || (usuarioActivo?._id == asientoSelect?.patrocinadorId && (usuarioActivo?.role == "admin" || usuarioActivo?.role == "super admin"))) {
+                console.log("entre3", Number(codAsiento?.split("-")[1]))
                 handleEditAsiento(asientoSelect, codAsiento)
             }
             console.log("asientoSelect: ", asientoSelect)
@@ -1110,7 +1119,19 @@ export default function Eventos() {
                             <p><b>Cliente:</b> ${asientoSelect.nombres} ${asientoSelect.apellidoPaterno} ${asientoSelect.apellidoMaterno}</p>
                             <p><b>Celular:</b> ${asientoSelect.celular}</p>
                             <p><b>Precio:</b> S/. ${changeDecimales(asientoSelect.precio)}</p>
-                            <p><b>Grupo de asientos:</b> ${asientoSelect.grupoAsientosComprados?.split(',').map((x: any) => x.split('-')[1]).join(', ')}</p>
+                            <p><b>Grupo de asientos:</b> ${(asientoSelect.grupoAsientosComprados?.includes("Fue editado único:"))
+                                ? `Editado único: ${((Number(asientoSelect.grupoAsientosComprados?.split("Fue editado único:")[1]) - 1) % 49) + 2}`
+                                :
+                                asientoSelect.grupoAsientosComprados
+                                    ?.split(",")
+                                    .map((seg: string) => {
+                                        const part = seg.split("-")[1]?.trim();               // "50-01" -> "01"
+                                        const n = Number(part);                               // "01" -> 1
+                                        if (!Number.isFinite(n) || isNaN(n)) return "";      // manejar casos inválidos
+                                        return String(((n - 1) % 49) + 2);                   // aplicar lógica 49 en 49 y devolver string
+                                    })
+                                    .filter(Boolean)                                       // quitar entradas vacías si las hay
+                                    .join(", ")}</p>
                             <p><b>Voucher subido:</b></p>
                             <div style="text-align: center; margin-top: 15px;">
                               <img 
@@ -1247,6 +1268,95 @@ export default function Eventos() {
 
     }
 
+    const handlePasajerosBuses = (total: any, bus: any) => {
+        const capacidades = [49, 30, 20, 17, 10]; // de mayor a menor
+        const resultado = [];
+
+        let ref = 10
+        let ref2 = 49
+        if (total > 1 && total <= 10) {
+            ref = 10
+        }
+        else if (total > 10 && total <= 17) {
+            ref = 17
+        }
+        else if (total > 17 && total <= 20) {
+            ref = 20
+        }
+        else if (total > 20 && total <= 30) {
+            ref = 30
+        }
+        else if (total > 30) {
+            ref = 49
+        }
+        console.log("ref", ref)
+        let cantidadBusesTotales = Math.ceil(total / ref);
+        console.log("cantidadBusesTotales", cantidadBusesTotales)
+        let pasajeros = Number(total) + cantidadBusesTotales;
+        let pasajerosSobrantes = pasajeros - (Math.floor(total / ref) * ref);
+        let pasajerosActuales = Math.floor(total / ref) * ref;
+        resultado.push({
+            "text": `bus${ref2}`,
+            "capacidad": ref2,
+            "pasajeros": pasajerosActuales,
+            "cantidadBuses": Math.floor(total / ref),
+        })
+
+        console.log("pasajeros", pasajeros)
+        console.log("pasajerosSobrantes", pasajerosSobrantes)
+
+        if (pasajerosSobrantes > 1 && pasajerosSobrantes <= 10) {
+            ref2 = 10
+            resultado.push({
+                "text": `bus${ref2}`,
+                "capacidad": ref2,
+                "pasajeros": pasajerosSobrantes,
+                "cantidadBuses": 1,
+            })
+        }
+        else if (pasajerosSobrantes > 10 && pasajerosSobrantes <= 17) {
+            ref2 = 17
+            resultado.push({
+                "text": `bus${ref2}`,
+                "capacidad": ref2,
+                "pasajeros": pasajerosSobrantes,
+                "cantidadBuses": 1,
+            })
+        }
+        else if (pasajerosSobrantes > 17 && pasajerosSobrantes <= 20) {
+            ref2 = 20
+            resultado.push({
+                "text": `bus${ref2}`,
+                "capacidad": ref2,
+                "pasajeros": pasajerosSobrantes,
+                "cantidadBuses": 1,
+            })
+        }
+        else if (pasajerosSobrantes > 20 && pasajerosSobrantes <= 30) {
+            ref2 = 30
+            resultado.push({
+                "text": `bus${ref2}`,
+                "capacidad": ref2,
+                "pasajeros": pasajerosSobrantes,
+                "cantidadBuses": 1,
+            })
+        }
+        else if (pasajerosSobrantes > 30) {
+            ref2 = 49
+            resultado.push({
+                "text": `bus${ref2}`,
+                "capacidad": ref2,
+                "pasajeros": pasajerosSobrantes,
+                "cantidadBuses": 1,
+            })
+        }
+
+        console.log("resultado", resultado)
+
+        return resultado?.find((x: any) => x.text == bus)?.cantidadBuses ?? 0
+
+    }
+
     return (
         <div className="bg-cover bg-center h-[100vh]">
             <div
@@ -1261,7 +1371,7 @@ export default function Eventos() {
                     // style={{ backgroundImage: "url('/fondopasajes (1).jpg')" }}
                     >
                         {
-                            (usuarioActivo?.role == "admin" || usuarioActivo?.role == "super admin" || usuarioActivo?.role == "super admin") &&
+                            (usuarioActivo?.role == "admin" || usuarioActivo?.role == "super admin" || usuarioActivo?.role == "user asesor") &&
                             <div>
                                 <button className="bg-blue-500 text-white px-2 py-2 relative z-20 font-bold text-xl cursor-pointer rounded-lg ml-0 mt-2 flex justify-center items-center"
                                     onClick={() => {
@@ -1309,7 +1419,7 @@ export default function Eventos() {
                                                         {"Sprinter10:"}
                                                     </div>
                                                     <div className='font-bold text-blue-400'>
-                                                        {`${dataAsientosComprados?.filter((x: any) => x?.status == "1")?.length <= 10 ? "1" : "0"}`}
+                                                        {handlePasajerosBuses(dataAsientosComprados?.filter((x: any) => x?.status == "1")?.length, "bus10")}
                                                     </div>
                                                 </div>
                                                 <div className='flex flex-row gap-2 w-full px-2 py-1 border rounded-lg border-blue-100 bg-blue-50'>
@@ -1317,7 +1427,7 @@ export default function Eventos() {
                                                         {"Sprinter17:"}
                                                     </div>
                                                     <div className='font-bold text-blue-400'>
-                                                        {`${dataAsientosComprados?.filter((x: any) => x?.status == "1")?.length >= 11 && dataAsientosComprados?.filter((x: any) => x?.status == "1")?.length <= 17 ? "1" : "0"}`}
+                                                        {handlePasajerosBuses(dataAsientosComprados?.filter((x: any) => x?.status == "1")?.length, "bus17")}
                                                     </div>
                                                 </div>
                                                 <div className='flex flex-row gap-2 w-full px-2 py-1 border rounded-lg border-blue-100 bg-blue-50'>
@@ -1325,7 +1435,7 @@ export default function Eventos() {
                                                         {"Sprinter20:"}
                                                     </div>
                                                     <div className='font-bold text-blue-400'>
-                                                        {`${dataAsientosComprados?.filter((x: any) => x?.status == "1")?.length >= 18 && dataAsientosComprados?.filter((x: any) => x?.status == "1")?.length <= 20 ? "1" : "0"}`}
+                                                        {handlePasajerosBuses(dataAsientosComprados?.filter((x: any) => x?.status == "1")?.length, "bus20")}
                                                     </div>
                                                 </div>
                                                 <div className='flex flex-row gap-2 w-full px-2 py-1 border rounded-lg border-blue-100 bg-blue-50'>
@@ -1333,7 +1443,7 @@ export default function Eventos() {
                                                         {"Bus30:"}
                                                     </div>
                                                     <div className='font-bold text-blue-400'>
-                                                        {`${dataAsientosComprados?.filter((x: any) => x?.status == "1")?.length >= 21 && dataAsientosComprados?.filter((x: any) => x?.status == "1")?.length <= 30 ? "1" : "0"}`}
+                                                        {handlePasajerosBuses(dataAsientosComprados?.filter((x: any) => x?.status == "1")?.length, "bus30")}
                                                     </div>
                                                 </div>
                                                 <div className='flex flex-row gap-2 w-full px-2 py-1 border rounded-lg border-blue-100 bg-blue-50'>
@@ -1341,7 +1451,7 @@ export default function Eventos() {
                                                         {"Bus50:"}
                                                     </div>
                                                     <div className='font-bold text-blue-400'>
-                                                        {`${dataAsientosComprados?.filter((x: any) => x?.status == "1")?.length >= 31 && dataAsientosComprados?.filter((x: any) => x?.status == "1")?.length <= 50 ? "1" : "0"}`}
+                                                        {handlePasajerosBuses(dataAsientosComprados?.filter((x: any) => x?.status == "1")?.length, "bus49")}
                                                     </div>
                                                 </div>
                                                 <div className='flex flex-row gap-2 w-full px-2 py-1 border rounded-lg border-blue-100 bg-blue-50'>
