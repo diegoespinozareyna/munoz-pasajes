@@ -315,12 +315,12 @@ export default function Eventos() {
     useEffect(() => {
         fetchAsientosIdMatrix()
         // usersPatrocinaddores()
-    }, [info, getInitialStateFirstAsiento])
+    }, [info, getInitialStateFirstAsiento, valorRef])
 
     useEffect(() => {
         fetchAsientosIdMatrix2()
         // usersPatrocinaddores()
-    }, [change1, getInitialNumerAsientos, info])
+    }, [change1, getInitialNumerAsientos, info, valorRef])
 
     const fetchEventId = async (id: string | string[]) => {
         try {
