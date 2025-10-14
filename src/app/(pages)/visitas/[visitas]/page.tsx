@@ -147,11 +147,11 @@ export default function Eventos() {
             // if (response?.data?.length > 0) {
             const paths: any = document.querySelectorAll(`#${Apis.PROYECTCURRENT} path`);
             const matchAll = response?.data?.filter((obj2: any) => obj2?.status !== "3")?.length;
+            setGetInitialStateFirstAsiento((matchAll + 1))
+            setValorRef((matchAll + 1))
             console.log("matchAll: ", matchAll)
             paths.forEach((obj1: any) => {
                 const match = response?.data?.find((obj2: any) => obj2?.codAsiento === obj1?.id && obj2?.status !== "3");
-                setGetInitialStateFirstAsiento((matchAll + 1))
-                setValorRef((matchAll + 1))
                 const hoy = new Date();
                 const fechaFin = new Date(match?.fechaFin); // Asegúrate de que sea Date
                 // console.log("fechaFin: ", fechaFin)
@@ -315,12 +315,12 @@ export default function Eventos() {
     useEffect(() => {
         fetchAsientosIdMatrix()
         // usersPatrocinaddores()
-    }, [info, getInitialStateFirstAsiento, valorRef])
+    }, [info, getInitialStateFirstAsiento])
 
     useEffect(() => {
         fetchAsientosIdMatrix2()
         // usersPatrocinaddores()
-    }, [change1, getInitialNumerAsientos, info, valorRef])
+    }, [change1, getInitialNumerAsientos, info])
 
     const fetchEventId = async (id: string | string[]) => {
         try {
