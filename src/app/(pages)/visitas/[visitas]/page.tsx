@@ -51,11 +51,40 @@ declare global {
 }
 
 type AsientoRaw = any; // adapta según tu tipado real
-
 export default function Eventos() {
 
     const [info, setInfo] = useState<any>(null)
     const router = useRouter()
+
+    useEffect(() => {
+        const fechaVisitaMillis = moment.tz(info?.fechaVisita, "America/Lima").valueOf();
+        const ahoraMillis = moment.tz("America/Lima").valueOf();
+
+        console.log("info: ", info);
+        console.log("fechaVisitaMillis: ", fechaVisitaMillis);
+        console.log("ahoraMillis: ", ahoraMillis);
+        console.log("ahoraMilliscompare: ", fechaVisitaMillis <= ahoraMillis);
+
+        if (info !== null && fechaVisitaMillis <= ahoraMillis) {
+            console.log("La visita es inválida");
+            Swal.fire({
+                icon: "error",
+                title: "Esta visita a expirado",
+                text: "Solicitar nuevo link de visita",
+                showConfirmButton: false, // 🔹 sin botón OK
+                showCancelButton: false,  // 🔹 sin botón Cancelar
+                allowOutsideClick: false, // 🔒 no se puede cerrar al hacer clic fuera
+                allowEscapeKey: false,    // 🔒 no se puede cerrar con Esc
+                allowEnterKey: false,     // 🔒 no se puede cerrar con Enter
+            });
+            // setTimeout(() => {
+            //     window.location.reload()
+            // }, 2000)
+        }
+        else {
+            console.log("La visita es válida222222222");
+        }
+    }, [info]);
 
     // const usuarioActivo = useUserStore(state => state.user)
     // console.log(usuarioActivo)
@@ -2712,7 +2741,7 @@ export default function Eventos() {
                                                                     component="label"
                                                                     style={{ textTransform: "none" }}
                                                                 >
-                                                                    {"Seleccionar Voucher (Obligatorio)"}
+                                                                    {"Seleccionar Voucher aquí (Obligatorio)"}
                                                                     <input
                                                                         type="file"
                                                                         accept="image/*,application/pdf"

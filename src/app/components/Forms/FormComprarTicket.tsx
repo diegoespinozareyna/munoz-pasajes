@@ -198,7 +198,7 @@ export const FormComprarTicket = ({ getValues, setValue, handleSubmit, control, 
                                                             component="label"
                                                             style={{ textTransform: "none" }}
                                                         >
-                                                            {"Seleccionar Voucher (Obligatorio)"}
+                                                            {"Seleccionar Voucher AQUÍ (Obligatorio)"}
                                                             <input
                                                                 type="file"
                                                                 accept="image/*,application/pdf"

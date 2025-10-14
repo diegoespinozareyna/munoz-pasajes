@@ -608,7 +608,7 @@ export const PopUp = ({ onSubmit, handleSubmit, control, apiCall, loading, error
                                         className="w-full"
                                         disabled={loading || loadingUpload}
                                     >
-                                        {`Pagar: S/. ${changeDecimales(getValues()?.sumaTotalPago)}`}
+                                        {`aceptar: S/. ${changeDecimales(getValues()?.sumaTotalPago)}`}
                                     </Button>
                                     <Button
                                         onClick={() => {
