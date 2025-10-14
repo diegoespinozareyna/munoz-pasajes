@@ -32,6 +32,8 @@ import { useUserStore } from "@/app/store/userStore"
 import { Bus502 } from "@/app/components/sprinterssvg/Bus502"
 import { Bus149 } from "@/app/components/sprinterssvg/Bus149"
 import { Bus5098 } from "@/app/components/sprinterssvg/Bus5098"
+import { Bus99146 } from "@/app/components/sprinterssvg/Bus99146"
+import { Bus145194 } from "@/app/components/sprinterssvg/Bus145194"
 // import { jsPDF } from "jspdf";
 // import "jspdf-autotable";
 
@@ -90,6 +92,7 @@ export default function Eventos() {
     const [change1, setChange1] = useState(false)
     const [arrAsientoSeleccionados, setArrAsientoSeleccionados] = useState<any>([])
     const [getInitialStateFirstAsiento, setGetInitialStateFirstAsiento] = useState(1)
+    const [getInitialNumerAsientos, setGetInitialNumerAsientos] = useState(0)
 
     useEffect(() => {
         console.log("arrAsientoSeleccionados: ", arrAsientoSeleccionados)
@@ -133,6 +136,8 @@ export default function Eventos() {
             console.log("responseEventId: ", response?.data);
             setDataAsientosComprados(response?.data?.filter((x: any) => x?.status !== "3"));
             console.log(info?.dateEvent)
+
+            setGetInitialNumerAsientos(response?.data?.length)
 
             // let ref = 2;
 
@@ -239,6 +244,9 @@ export default function Eventos() {
                 }
             });
             console.log("responseEventId: ", response?.data);
+            console.log("responseEventIdlength: ", response?.data?.length);
+            console.log("getInitialStateFirstAsiento: ", getInitialStateFirstAsiento);
+            console.log("getInitialNumerAsientos: ", getInitialNumerAsientos);
             setDataAsientosComprados(response?.data?.filter((x: any) => x?.status !== "3"));
             console.log(info?.dateEvent)
             const paths = document.querySelectorAll(`#${Apis.PROYECTCURRENT} path`);
@@ -246,6 +254,18 @@ export default function Eventos() {
                 const match = response?.data?.find((obj2: any) => obj2?.codAsiento === obj1?.id && obj2?.status !== "3");
                 const matchAll = response?.data?.filter((obj2: any) => obj2?.codAsiento === obj1?.id && obj2?.status !== "3")?.length;
                 console.log("matchAll: ", matchAll)
+
+                if (getInitialNumerAsientos !== 0 && getInitialNumerAsientos !== response?.data?.length) {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Otro usuario Reservó el(los) asiento(s) que seleccionaste",
+                        // text: "No se ha podido reservar asiento",
+                    });
+                    setTimeout(() => {
+                        window.location.reload()
+                    }, 2000)
+                }
+
                 if (match?.status == "1") {
                     // console.log("match?.status", match)
                     // obj1?.setAttribute('fill', Apis.COLOR_VENDIDO_CONTADO);
@@ -300,7 +320,7 @@ export default function Eventos() {
     useEffect(() => {
         fetchAsientosIdMatrix2()
         // usersPatrocinaddores()
-    }, [change1])
+    }, [change1, getInitialNumerAsientos])
 
     const fetchEventId = async (id: string | string[]) => {
         try {
@@ -536,128 +556,148 @@ export default function Eventos() {
             setValue("userVenta", null);
         }
 
-        const url = `${Apis.URL_APOIMENT_BACKEND_DEV}/api/pasajes/compraAsientoAll`
-        const url2 = `${Apis.URL_APOIMENT_BACKEND_DEV}/api/pasajes/editarAsiento`
-        const jsonSend = {
-            asientos: data?.asientos,
-            status: "0",
-            proyecto: Apis.PROYECTCURRENT,
-            usuarioRegistro: `${getValues()?.userVenta?.documentoUsuario ?? "Invitado"} - ${getValues()?.userVenta?.nombres ?? "Invitado"} ${getValues()?.userVenta?.apellidoPaterno ?? "Invitado"} ${getValues()?.userVenta?.apellidoMaterno ?? "Invitado"}`,
-            compraUserAntiguo: getValues(`UsuarioAntiguo`),
-            fechaFin: moment.tz(new Date(), "America/Lima").add(7, "days").format("YYYY-MM-DDTHH:mm"),
+        const url1 = `${Apis.URL_APOIMENT_BACKEND_DEV}/api/pasajes/getAsientosIdMatrix`
+        const response = await apiCall({
+            method: "get", endpoint: url1, data: null, params: {
+                proyecto: Apis.PROYECTCURRENT,
+                idMatrix: params?.visitas?.split("-")[1],
+            }
+        });
+        if (getInitialNumerAsientos !== 0 && getInitialNumerAsientos !== response?.data?.length) {
+            Swal.fire({
+                icon: "error",
+                title: "Otro usuario Reservó el(los) asiento(s) que seleccionaste",
+                // text: "No se ha podido reservar asiento",
+            });
+            setTimeout(() => {
+                window.location.reload()
+            }, 2000)
         }
-        console.log("jsonSend: ", jsonSend)
-
-        const montoTotalPasarela = getValues()?.asientos?.reduce((acum: any, item: any) => {
-            return (Number(acum) + Number(item.precio))
-        }, 0)
-        console.log("montoTotalPasarela: ", montoTotalPasarela)
-
-        const grupoAsientosComprados = getValues()?.asientos?.map((item: any, index: any) => {
-            return item.codAsiento
-        })
-
-        const jsonAsientosAll = getValues()?.asientos?.map((item: any, index: any) => {
-            return {
-                status: "1", // "0": pendiente, "1": aprobado, "2": rechazado, "3": anulado
-                documentoUsuario: item.documentoUsuario,
-                nombres: item.nombres,
-                apellidoPaterno: item.apellidoPaterno,
-                apellidoMaterno: item.apellidoMaterno,
-                celular: item.celular,
-                // email: item.email,
-                codAsiento: item.codAsiento, // numero de asiento
-                precio: item.precio,
-                codMatrixTicket: item.codMatrixTicket, // codigo id de evento
-                // fileUrl: String,
-                compraUserAntiguo: item.UsuarioAntiguo,
+        else {
+            const url = `${Apis.URL_APOIMENT_BACKEND_DEV}/api/pasajes/compraAsientoAll`
+            const url2 = `${Apis.URL_APOIMENT_BACKEND_DEV}/api/pasajes/editarAsiento`
+            const jsonSend = {
+                asientos: data?.asientos,
+                status: "0",
                 proyecto: Apis.PROYECTCURRENT,
                 usuarioRegistro: `${getValues()?.userVenta?.documentoUsuario ?? "Invitado"} - ${getValues()?.userVenta?.nombres ?? "Invitado"} ${getValues()?.userVenta?.apellidoPaterno ?? "Invitado"} ${getValues()?.userVenta?.apellidoMaterno ?? "Invitado"}`,
-                patrocinadorId: item?.patrocinadorId,
+                compraUserAntiguo: getValues(`UsuarioAntiguo`),
                 fechaFin: moment.tz(new Date(), "America/Lima").add(7, "days").format("YYYY-MM-DDTHH:mm"),
-                montoPasarela: montoTotalPasarela?.toString(),
-                grupoAsientosComprados: grupoAsientosComprados.join(','),
-                paradero: item.paradero,
             }
-        })
-        console.log("jsonAsientosAll: ", jsonAsientosAll)
+            console.log("jsonSend: ", jsonSend)
 
-        if (getValues()?.fileEvent !== "" && getValues()?.fileEvent !== undefined && getValues()?.fileEvent !== null) {
-            try {
-                setLoadigUpload(true)
-                // if (!getValues()?.fileEvent && !getValues(`flyerEvent`)?.fileUrl) return alert("Selecciona una imagen");
-                const formData = new FormData();
-                formData.append("image", getValues()?.fileEvent);
-                const res = await axios.post(`${Apis.URL_APOIMENT_BACKEND_DEV2}/upload`, formData, {
-                    headers: {
-                        "Content-Type": "multipart/form-data",
-                    },
-                });
-                if (res.status == 200) {
-                    // const response = await apiCall({
-                    //     method: "post", endpoint: url, data: { ...jsonSend, fileUrl: res.data.url }
-                    // })
-                    // console.log("responsefuianl: ", response)
-                    const response = await apiCall({
-                        method: "post", endpoint: url, data: jsonAsientosAll?.map((item: any, index: any) => {
-                            return {
-                                ...item,
-                                fileUrl: res.data.url,
-                                patrocinadorId: getValues()?.patrocinadorId?._id ?? usuarioActivo?._id,
-                            }
+            const montoTotalPasarela = getValues()?.asientos?.reduce((acum: any, item: any) => {
+                return (Number(acum) + Number(item.precio))
+            }, 0)
+            console.log("montoTotalPasarela: ", montoTotalPasarela)
+
+            const grupoAsientosComprados = getValues()?.asientos?.map((item: any, index: any) => {
+                return item.codAsiento
+            })
+
+            const jsonAsientosAll = getValues()?.asientos?.map((item: any, index: any) => {
+                return {
+                    status: "1", // "0": pendiente, "1": aprobado, "2": rechazado, "3": anulado
+                    documentoUsuario: item.documentoUsuario,
+                    nombres: item.nombres,
+                    apellidoPaterno: item.apellidoPaterno,
+                    apellidoMaterno: item.apellidoMaterno,
+                    celular: item.celular,
+                    // email: item.email,
+                    codAsiento: item.codAsiento, // numero de asiento
+                    precio: item.precio,
+                    codMatrixTicket: item.codMatrixTicket, // codigo id de evento
+                    // fileUrl: String,
+                    compraUserAntiguo: item.UsuarioAntiguo,
+                    proyecto: Apis.PROYECTCURRENT,
+                    usuarioRegistro: `${getValues()?.userVenta?.documentoUsuario ?? "Invitado"} - ${getValues()?.userVenta?.nombres ?? "Invitado"} ${getValues()?.userVenta?.apellidoPaterno ?? "Invitado"} ${getValues()?.userVenta?.apellidoMaterno ?? "Invitado"}`,
+                    patrocinadorId: item?.patrocinadorId,
+                    fechaFin: moment.tz(new Date(), "America/Lima").add(7, "days").format("YYYY-MM-DDTHH:mm"),
+                    montoPasarela: montoTotalPasarela?.toString(),
+                    grupoAsientosComprados: grupoAsientosComprados.join(','),
+                    paradero: item.paradero,
+                }
+            })
+            console.log("jsonAsientosAll: ", jsonAsientosAll)
+
+            if (getValues()?.fileEvent !== "" && getValues()?.fileEvent !== undefined && getValues()?.fileEvent !== null) {
+                try {
+                    setLoadigUpload(true)
+                    // if (!getValues()?.fileEvent && !getValues(`flyerEvent`)?.fileUrl) return alert("Selecciona una imagen");
+                    const formData = new FormData();
+                    formData.append("image", getValues()?.fileEvent);
+                    const res = await axios.post(`${Apis.URL_APOIMENT_BACKEND_DEV2}/upload`, formData, {
+                        headers: {
+                            "Content-Type": "multipart/form-data",
+                        },
+                    });
+                    if (res.status == 200) {
+                        // const response = await apiCall({
+                        //     method: "post", endpoint: url, data: { ...jsonSend, fileUrl: res.data.url }
+                        // })
+                        // console.log("responsefuianl: ", response)
+                        const response = await apiCall({
+                            method: "post", endpoint: url, data: jsonAsientosAll?.map((item: any, index: any) => {
+                                return {
+                                    ...item,
+                                    fileUrl: res.data.url,
+                                    patrocinadorId: getValues()?.patrocinadorId?._id ?? usuarioActivo?._id,
+                                }
+                            })
                         })
-                    })
-                    console.log("response: ", response)
-                    if (response.status === 201) {
-                        Swal.fire({
-                            title: 'Éxito',
-                            text: 'Se compró el/los asiento(s) con éxito',
-                            icon: 'success',
-                            confirmButtonText: 'OK',
-                            // showCancelButton: true,
-                            confirmButtonColor: '#3085d6',
-                            // cancelButtonColor: '#d33',
-                            // cancelButtonText: 'No',
-                            showLoaderOnConfirm: true,
-                            allowOutsideClick: false,
-                            // preConfirm: () => {
-                            //     router.push(`/dashboard/verUsuarios`);
-                            //     // window.location.href = `/dashboard/${Apis.PROYECTCURRENT}`;
-                            //     return
-                            // },
-                        });
-                        setTimeout(() => {
-                            window.location.reload()
-                        }, 800);
-                    } else {
-                        Swal.fire({
-                            title: 'Error!',
-                            text: 'No se ha podido reservar asiento',
-                            icon: 'error',
-                            confirmButtonText: 'OK',
-                            showCancelButton: true,
-                            confirmButtonColor: '#3085d6',
-                            cancelButtonColor: '#d33',
-                            // cancelButtonText: 'No',
-                            showLoaderOnConfirm: true,
-                            allowOutsideClick: false,
-                            // preConfirm: () => {
-                            //     return
-                            // },
-                        });
+                        console.log("response: ", response)
+                        if (response.status === 201) {
+                            Swal.fire({
+                                title: 'Éxito',
+                                text: 'Se compró el/los asiento(s) con éxito',
+                                icon: 'success',
+                                confirmButtonText: 'OK',
+                                // showCancelButton: true,
+                                confirmButtonColor: '#3085d6',
+                                // cancelButtonColor: '#d33',
+                                // cancelButtonText: 'No',
+                                showLoaderOnConfirm: true,
+                                allowOutsideClick: false,
+                                // preConfirm: () => {
+                                //     router.push(`/dashboard/verUsuarios`);
+                                //     // window.location.href = `/dashboard/${Apis.PROYECTCURRENT}`;
+                                //     return
+                                // },
+                            });
+                            setTimeout(() => {
+                                window.location.reload()
+                            }, 800);
+                        } else {
+                            Swal.fire({
+                                title: 'Error!',
+                                text: 'No se ha podido reservar asiento',
+                                icon: 'error',
+                                confirmButtonText: 'OK',
+                                showCancelButton: true,
+                                confirmButtonColor: '#3085d6',
+                                cancelButtonColor: '#d33',
+                                // cancelButtonText: 'No',
+                                showLoaderOnConfirm: true,
+                                allowOutsideClick: false,
+                                // preConfirm: () => {
+                                //     return
+                                // },
+                            });
+                        }
+
+
                     }
-
-
+                }
+                catch (error) {
+                    console.error('Error al enviar datos:', error);
+                }
+                finally {
+                    // setLoadigUpload(false)
+                    // fetchAsientosIdMatrix()
                 }
             }
-            catch (error) {
-                console.error('Error al enviar datos:', error);
-            }
-            finally {
-                // setLoadigUpload(false)
-                // fetchAsientosIdMatrix()
-            }
         }
+
     }
 
     const handleChangeState = async (id: string, codAsiento: any, key: any) => {
@@ -803,14 +843,26 @@ export default function Eventos() {
             .map((item: any) => ({
                 "Proyecto Visita": info?.destino == 1 ? "Miraflores del Norte 1" : info?.destino == 0 ? "Paracas" : "Paracas",
                 "Fecha Salida": moment.tz(info?.fechaVisita, "America/Lima").format("DD/MM/YYYY"),
-                invitado: `DNI: ${item.documentoUsuario ?? ""} - ${item.nombres ?? ""} ${item.apellidoPaterno ?? ""} ${item.apellidoMaterno ?? ""} - Cel: ${item.celular ?? ""}`,
+                "DNI Invitado": `${item.documentoUsuario ?? ""}`,
+                "Nombre Invitado": `${item.nombres ?? ""} ${item.apellidoPaterno ?? ""} ${item.apellidoMaterno ?? ""}`,
+                "Celular Invitado": `${item.celular ?? ""}`,
                 Precio: item.precio,
-                Asiento: item.codAsiento?.split("-")[1],
+                "N Bus": Math.ceil(Number(item.codAsiento?.split("-")[1]) / 49),
+                "N Asiento": ((Number(item.codAsiento?.split("-")[1]) - 1) % 49) + 2,
                 "Grupo de Asientos":
                     (item.grupoAsientosComprados?.includes("Fue editado único:"))
-                        ? item.grupoAsientosComprados
+                        ? `Editado único: ${((Number(item.grupoAsientosComprados?.split("Fue editado único:")[1]) - 1) % 49) + 2}`
                         :
-                        item.grupoAsientosComprados?.split(",").map((x: any) => x.split("-")[1]).join(", "),
+                        item.grupoAsientosComprados
+                            ?.split(",")
+                            .map((seg: string) => {
+                                const part = seg.split("-")[1]?.trim();               // "50-01" -> "01"
+                                const n = Number(part);                               // "01" -> 1
+                                if (!Number.isFinite(n) || isNaN(n)) return "";      // manejar casos inválidos
+                                return String(((n - 1) % 49) + 2);                   // aplicar lógica 49 en 49 y devolver string
+                            })
+                            .filter(Boolean)                                       // quitar entradas vacías si las hay
+                            .join(", "),
                 Paradero: paraderos.find((x: any) => x.value == item.paradero)?.label ?? "No definido",
                 Patrocinador: getValues()?.patrocinadorId?.label ?? item.usuarioRegistro,
                 RegistroPor: item.usuarioRegistro,
@@ -1410,7 +1462,7 @@ export default function Eventos() {
                                                         </Accordion>
                                                         {/* } */}
                                                         {
-                                                            (dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length >= 49 && dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length <= 96) &&
+                                                            (dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length >= 49) &&
                                                             <Accordion
                                                                 disabled={(usuarioActivo?.role == "admin" || usuarioActivo?.role == "super admin") ? false : true}
                                                                 defaultExpanded={dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length >= 49 && dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length <= 97 ? true : false}>
@@ -1431,7 +1483,7 @@ export default function Eventos() {
                                                             </Accordion>
                                                         }
                                                         {
-                                                            (dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length >= 98 && dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length <= 145) &&
+                                                            (dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length >= 98) &&
                                                             <Accordion
                                                                 disabled={(usuarioActivo?.role == "admin" || usuarioActivo?.role == "super admin") ? false : true}
                                                                 defaultExpanded={dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length >= 98 && dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length <= 145 ? true : false}>
@@ -1445,7 +1497,7 @@ export default function Eventos() {
                                                                 <AccordionDetails>
                                                                     <div>
                                                                         <div className='relative w-full h-[1220px] md:h-[900px] md:w-[400px] border border-slate-300 rounded-md'>
-                                                                            <Bus5098 {...{ handleClickInformation }} />
+                                                                            <Bus99146 {...{ handleClickInformation }} />
                                                                         </div>
                                                                     </div>
                                                                 </AccordionDetails>
@@ -1466,13 +1518,13 @@ export default function Eventos() {
                                                                 <AccordionDetails>
                                                                     <div>
                                                                         <div className='relative w-full h-[1220px] md:h-[900px] md:w-[400px] border border-slate-300 rounded-md'>
-                                                                            <Bus5098 {...{ handleClickInformation }} />
+                                                                            <Bus145194 {...{ handleClickInformation }} />
                                                                         </div>
                                                                     </div>
                                                                 </AccordionDetails>
                                                             </Accordion>
                                                         }
-                                                        {
+                                                        {/* {
                                                             (dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length >= 194 && dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length <= 241) &&
                                                             <Accordion
                                                                 disabled={(usuarioActivo?.role == "admin" || usuarioActivo?.role == "super admin") ? false : true}
@@ -1492,7 +1544,7 @@ export default function Eventos() {
                                                                     </div>
                                                                 </AccordionDetails>
                                                             </Accordion>
-                                                        }
+                                                        } */}
                                                     </div>
                                                     <div className="flex flex-col gap-3 justify-start items-center">
                                                         Asientos Seleccionados:
