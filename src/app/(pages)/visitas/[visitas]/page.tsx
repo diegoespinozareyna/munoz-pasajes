@@ -369,7 +369,7 @@ export default function Eventos() {
             console.error('Error al obtener datos del usuario:', error);
             setValue("user", []);
         }
-    }, [])
+    }, [dataAsientosComprados])
 
     // useEffect(() => {
     //     console.log(usuarioActivo)
@@ -469,7 +469,11 @@ export default function Eventos() {
                 console.log("entre3", Number(codAsiento?.split("-")[1]))
                 handleEditAsiento(asientoSelect, codAsiento)
             }
-            if (usuarioActivo?._id == asientoSelect?.patrocinadorId && (usuarioActivo?.role == "user asesor")) {
+            else if (usuarioActivo?._id == asientoSelect?.patrocinadorId && (usuarioActivo?.role == "user asesor" || usuarioActivo?.role == "admin" || usuarioActivo?.role == "super admin")) {
+                console.log("entre3", Number(codAsiento?.split("-")[1]))
+                handleEditAsiento(asientoSelect, codAsiento)
+            }
+            else if (usuarioActivo?._id !== asientoSelect?.patrocinadorId && (usuarioActivo?.role == "admin" || usuarioActivo?.role == "super admin")) {
                 console.log("entre3", Number(codAsiento?.split("-")[1]))
                 handleEditAsiento(asientoSelect, codAsiento)
             }
@@ -856,6 +860,7 @@ export default function Eventos() {
                 "Nombre Invitado": `${item.nombres ?? ""} ${item.apellidoPaterno ?? ""} ${item.apellidoMaterno ?? ""}`,
                 "Celular Invitado": `${item.celular ?? ""}`,
                 Precio: item.precio,
+                "¿Compra Asesor/Invitado?": item.compraUserAntiguo ? "Asesor" : "Invitado",
                 "N Bus": Math.ceil(Number(item.codAsiento?.split("-")[1]) / 49),
                 "N Asiento": ((Number(item.codAsiento?.split("-")[1]) - 1) % 49) + 2,
                 "Grupo de Asientos":
@@ -886,7 +891,6 @@ export default function Eventos() {
                                 ? "Liberado"
                                 : "Bloqueado",
                 "¿Pasarela?": item.isPasarela ? "Sí" : "No",
-                "¿Compra Asesor/Invitado?": item.compraUserAntiguo ? "Asesor" : "Invitado",
                 Vouchers: item.fileUrl,
             })) ?? [];
 
@@ -1003,7 +1007,16 @@ export default function Eventos() {
         const url = `${Apis.URL_APOIMENT_BACKEND_DEV}/api/pasajes/editarAsiento`
         if (asientoSelect?.status == "99") {
             Swal.fire({
-                title: `Asiento ${asientoSelect?.codAsiento?.split("-")[1]}`,
+                title: `Asiento ${[asientoSelect?.codAsiento]
+                    // ?.split(",")
+                    .map((seg: string) => {
+                        const part = seg.split("-")[1]?.trim();               // "50-01" -> "01"
+                        const n = Number(part);                               // "01" -> 1
+                        if (!Number.isFinite(n) || isNaN(n)) return "";      // manejar casos inválidos
+                        return String(((n - 1) % 49) + 2);                   // aplicar lógica 49 en 49 y devolver string
+                    })
+                    .filter(Boolean)                                       // quitar entradas vacías si las hay
+                    .join(", ")}`,
                 text: "",
                 icon: "info",
                 confirmButtonText: "Editar",
@@ -1019,7 +1032,16 @@ export default function Eventos() {
         }
         else {
             Swal.fire({
-                title: `Asiento ${asientoSelect?.codAsiento?.split("-")[1]}`,
+                title: `Asiento ${[asientoSelect?.codAsiento]
+                    // ?.split(",")
+                    .map((seg: string) => {
+                        const part = seg.split("-")[1]?.trim();               // "50-01" -> "01"
+                        const n = Number(part);                               // "01" -> 1
+                        if (!Number.isFinite(n) || isNaN(n)) return "";      // manejar casos inválidos
+                        return String(((n - 1) % 49) + 2);                   // aplicar lógica 49 en 49 y devolver string
+                    })
+                    .filter(Boolean)                                       // quitar entradas vacías si las hay
+                    .join(", ")}`,
                 text: "Selecciona una acción",
                 icon: "warning",
                 showDenyButton: true,  // botón secundario
@@ -1112,7 +1134,16 @@ export default function Eventos() {
                 else if (result.isConfirmed) {
                     console.log("Se presionó ver datos");
                     Swal.fire({
-                        title: `Asiento N° ${asientoSelect.codAsiento?.split("-")[1]}`,
+                        title: `Asiento N° ${[asientoSelect?.codAsiento]
+                            // ?.split(",")
+                            .map((seg: string) => {
+                                const part = seg.split("-")[1]?.trim();               // "50-01" -> "01"
+                                const n = Number(part);                               // "01" -> 1
+                                if (!Number.isFinite(n) || isNaN(n)) return "";      // manejar casos inválidos
+                                return String(((n - 1) % 49) + 2);                   // aplicar lógica 49 en 49 y devolver string
+                            })
+                            .filter(Boolean)                                       // quitar entradas vacías si las hay
+                            .join(", ")}`,
                         html: `
                         <div style="text-align: left; font-size: 15px;">
                             <p><b>DNI:</b> ${asientoSelect.documentoUsuario}</p>
@@ -1389,17 +1420,23 @@ export default function Eventos() {
                             // style={{ backgroundImage: "url('/fondopasajes (1).jpg')" }}
                             >
                                 <div className='flex flex-col justify-center items-center w-full md:w-full max-w-4xl gap-4'>
-                                    <div className='flex flex-col gap-1 justify-center items-center'>
-                                        <h1 className='text-center text-white text-2xl font-bold'>
-                                            {info?.titulo}
+                                    <div className='flex flex-col gap-1 justify-center items-center w-full bg-[rgba(0,0,255,0.8)] rounded-lg p-4 mb-2'>
+                                        <h1 className="text-center text-yellow-400 text-2xl font-bold">
+                                            {`Reserva tu asiento`}
                                         </h1>
-                                        <h1 className='text-center text-white text-2xl font-bold'>
+                                        <h1 className='text-center text-white text-md font-bold'>
+                                            {`Para conocer tu proyecto`}
+                                        </h1>
+                                        <h1 className='text-center text-yellow-400 text-xl font-bold'>
+                                            {info?.destino == 1 ? "Miraflores del Norte 1" : info?.destino == 0 ? "Parques de Paracas" : "Parques de Paracas"}
+                                        </h1>
+                                        {/* <h1 className='text-center text-white text-2xl font-bold'>
                                             {moment.tz(info?.fechaVisita, "America/Lima").format("DD/MM/YYYY")}
-                                        </h1>
+                                        </h1> */}
                                     </div>
 
                                     {/* contadores */}
-                                    <div id='counters' className='flex flex-col w-full gap-2'>
+                                    <div id='counters' className='flex flex-col w-full gap-2 -mt-7'>
                                         <div className='text-white flex justify-start items-start gap-4 font-bold uppercase'>
                                             {/* Contadores */}
                                         </div>
@@ -1481,160 +1518,170 @@ export default function Eventos() {
                                     <div id='asientosBuses' className='flex flex-col w-full gap-2'>
                                         <div
                                             className='flex flex-col gap-4 justify-center items-center bg-[rgba(255,255,255,0.8)] rounded-lg px-3 py-2 pb-20'>
-                                            <div className='flex w-full justify-between'>
-                                                <div className='flex justify-center items-center gap-4 mt-4'>
-                                                    {/* <div className='scale-200 -mt-2'>
-                                                        🚌
-                                                    </div> */}
-                                                    <div className='scale-100 -mt-2 flex flex-col md:flex-row justify-start items-start gap-2'>
-                                                        <div className='scale-100 -mt-2 flex justify-center items-center gap-2'>
-                                                            <Circle className="h-5 w-5 bg-[#61baed] rounded-full" />
-                                                            <div>
-                                                                <h1 className='text-md font-bold'>
-                                                                    {`${"Vendido"}`}
-                                                                </h1>
-                                                            </div>
-                                                        </div>
-                                                        {/* <div className='scale-100 -mt-2 flex justify-center items-center gap-2'>
-                                                            <Circle className="h-5 w-5 bg-[#f9bc38] rounded-full" />
-                                                            <div>
-                                                                <h1 className='text-md font-bold'>
-                                                                    {`${"Reservado"}`}
-                                                                </h1>
-                                                            </div>
-                                                        </div> */}
-                                                        <div className='scale-100 -mt-2 flex justify-center items-center gap-2'>
-                                                            <Circle className="h-5 w-5 bg-[#fff] rounded-full" />
-                                                            <div>
-                                                                <h1 className='text-md font-bold'>
-                                                                    {`${"Disponible"}`}
-                                                                </h1>
-                                                            </div>
-                                                        </div>
-                                                        <div className='scale-100 -mt-2 flex justify-center items-center gap-2'>
-                                                            <Circle color="#00f" className="h-5 w-5 bg-[#ccf] rounded-full border border-[00f]" />
-                                                            <div>
-                                                                <h1 className='text-md font-bold'>
-                                                                    {`${"Seleccionado"}`}
-                                                                </h1>
-                                                            </div>
-                                                        </div>
-                                                        <div className='scale-100 -mt-2 flex justify-center items-center gap-2'>
-                                                            <Circle className="h-5 w-5 bg-[#ccc] rounded-full" />
-                                                            <div>
-                                                                <h1 className='text-md font-bold'>
-                                                                    {`${"No Disponible"}`}
-                                                                </h1>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div>
-                                                        <h1 className='text-xl font-bold'>
-                                                            {/* {`${"Sprinter 10"}`} */}
-                                                        </h1>
-                                                    </div>
-                                                </div>
-                                                {/* <div className='flex justify-center items-center gap-0'>
-                                                    <div className='scale-110 bg-white p-1'>
-                                                        🚌{`Ocupados: ${dataAsientosComprados?.filter((x: any) => x?.status == "1")?.length}/50`}
-                                                    </div>
-                                                    <div>
-                                                    </div>
-                                                </div> */}
-                                            </div>
-                                            <div className="text-center text-xs text-red-500 font-bold uppercase">
+                                            <div className="text-center text-lg text-blue-500 font-bold uppercase">
                                                 {"Seleccione asientos Disponibles (Blancos) *"}
                                             </div>
                                             <form className="relative" onSubmit={handleSubmit(onValid, onInvalid)}>
                                                 <div className='relative w-full h-full grid grid-cols-1 md:grid-cols-2 gap-2'>
-                                                    {/* asientos svgx */}
-                                                    {/* {
-                                                        dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length <= 48 && */}
-                                                    <div className="flex flex-col gap-2">
-                                                        <Accordion
-                                                            disabled={(usuarioActivo?.role == "admin" || usuarioActivo?.role == "super admin") ? false : true}
-                                                            defaultExpanded={dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length <= 48 ? true : false}
-                                                        >
-                                                            <AccordionSummary
-                                                                expandIcon={<ArrowDown style={{ display: (usuarioActivo?.role == "admin" || usuarioActivo?.role == "super admin") ? "block" : "none" }} className="rounded-full bg-slate-300 h-6 w-6 p-1" />}
-                                                                aria-controls="panel1-content"
-                                                                id="panel1-header"
-                                                            >
-                                                                <Typography className="!text-lg !font-bold" component="span">Bus 1</Typography>
-                                                            </AccordionSummary>
-                                                            <AccordionDetails>
-                                                                <div>
-                                                                    <div className='relative w-full h-[1220px] md:h-[900px] md:w-[400px] border border-slate-300 rounded-md'>
-                                                                        <Bus149 {...{ handleClickInformation }} />
-                                                                    </div>
-                                                                </div>
-                                                            </AccordionDetails>
-                                                        </Accordion>
-                                                        {/* } */}
-                                                        {
-                                                            (dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length >= 49) &&
-                                                            <Accordion
-                                                                disabled={(usuarioActivo?.role == "admin" || usuarioActivo?.role == "super admin") ? false : true}
-                                                                defaultExpanded={dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length >= 49 && dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length <= 97 ? true : false}>
-                                                                <AccordionSummary
-                                                                    expandIcon={<ArrowDown style={{ display: (usuarioActivo?.role == "admin" || usuarioActivo?.role == "super admin") ? "block" : "none" }} className="rounded-full bg-slate-300 h-6 w-6 p-1" />}
-                                                                    aria-controls="panel1-content"
-                                                                    id="panel1-header"
+                                                    {
+                                                        (usuarioActivo?.role == "admin" || usuarioActivo?.role == "super admin") ?
+                                                            <div className="flex flex-col gap-2">
+                                                                <Accordion
+                                                                    disabled={(usuarioActivo?.role == "admin" || usuarioActivo?.role == "super admin") ? false : true}
+                                                                    defaultExpanded={dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length <= 48 ? true : false}
                                                                 >
-                                                                    <Typography className="!text-lg !font-bold" component="span">Bus 2</Typography>
-                                                                </AccordionSummary>
-                                                                <AccordionDetails>
-                                                                    <div>
-                                                                        <div className='relative w-full h-[1220px] md:h-[900px] md:w-[400px] border border-slate-300 rounded-md'>
-                                                                            <Bus5098 {...{ handleClickInformation }} />
+                                                                    <AccordionSummary
+                                                                        expandIcon={<ArrowDown style={{ display: (usuarioActivo?.role == "admin" || usuarioActivo?.role == "super admin") ? "block" : "none" }} className="rounded-full bg-slate-300 h-6 w-6 p-1" />}
+                                                                        aria-controls="panel1-content"
+                                                                        id="panel1-header"
+                                                                    >
+                                                                        <Typography className="!text-lg !font-bold" component="span">Bus 1</Typography>
+                                                                    </AccordionSummary>
+                                                                    <AccordionDetails>
+                                                                        <div>
+                                                                            <div className='relative w-full h-[1220px] md:h-[900px] md:w-[400px]'>
+                                                                                <div className='scale-100 -mt-2 flex flex-col md:flex-row justify-start items-start gap-2'>
+                                                                                    <div className='scale-100 -mt-2 flex justify-center items-center gap-2'>
+                                                                                        <Circle className="h-5 w-5 bg-[#61baed] rounded-full" />
+                                                                                        <div>
+                                                                                            <h1 className='text-md font-bold'>
+                                                                                                {`${"Asiento Ocupado"}`}
+                                                                                            </h1>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <div className='scale-100 -mt-2 flex justify-center items-center gap-2'>
+                                                                                        <Circle className="h-5 w-5 bg-[#fff] rounded-full" />
+                                                                                        <div>
+                                                                                            <h1 className='text-md font-bold'>
+                                                                                                {`${"Asiento Disponible"}`}
+                                                                                            </h1>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <Bus149 {...{ handleClickInformation }} />
+                                                                            </div>
                                                                         </div>
-                                                                    </div>
-                                                                </AccordionDetails>
-                                                            </Accordion>
-                                                        }
-                                                        {
-                                                            (dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length >= 98) &&
-                                                            <Accordion
-                                                                disabled={(usuarioActivo?.role == "admin" || usuarioActivo?.role == "super admin") ? false : true}
-                                                                defaultExpanded={dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length >= 98 && dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length <= 145 ? true : false}>
-                                                                <AccordionSummary
-                                                                    expandIcon={<ArrowDown style={{ display: (usuarioActivo?.role == "admin" || usuarioActivo?.role == "super admin") ? "block" : "none" }} className="rounded-full bg-slate-300 h-6 w-6 p-1" />}
-                                                                    aria-controls="panel1-content"
-                                                                    id="panel1-header"
-                                                                >
-                                                                    <Typography className="!text-lg !font-bold" component="span">Bus 3</Typography>
-                                                                </AccordionSummary>
-                                                                <AccordionDetails>
-                                                                    <div>
-                                                                        <div className='relative w-full h-[1220px] md:h-[900px] md:w-[400px] border border-slate-300 rounded-md'>
-                                                                            <Bus99146 {...{ handleClickInformation }} />
-                                                                        </div>
-                                                                    </div>
-                                                                </AccordionDetails>
-                                                            </Accordion>
-                                                        }
-                                                        {
-                                                            (dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length >= 146 && dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length <= 193) &&
-                                                            <Accordion
-                                                                disabled={(usuarioActivo?.role == "admin" || usuarioActivo?.role == "super admin") ? false : true}
-                                                                defaultExpanded={dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length >= 146 && dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length <= 193 ? true : false}>
-                                                                <AccordionSummary
-                                                                    expandIcon={<ArrowDown style={{ display: (usuarioActivo?.role == "admin" || usuarioActivo?.role == "super admin") ? "block" : "none" }} className="rounded-full bg-slate-300 h-6 w-6 p-1" />}
-                                                                    aria-controls="panel1-content"
-                                                                    id="panel1-header"
-                                                                >
-                                                                    <Typography className="!text-lg !font-bold" component="span">Bus 4</Typography>
-                                                                </AccordionSummary>
-                                                                <AccordionDetails>
-                                                                    <div>
-                                                                        <div className='relative w-full h-[1220px] md:h-[900px] md:w-[400px] border border-slate-300 rounded-md'>
-                                                                            <Bus145194 {...{ handleClickInformation }} />
-                                                                        </div>
-                                                                    </div>
-                                                                </AccordionDetails>
-                                                            </Accordion>
-                                                        }
-                                                        {/* {
+                                                                    </AccordionDetails>
+                                                                </Accordion>
+                                                                {/* } */}
+                                                                {
+                                                                    (dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length >= 49) &&
+                                                                    <Accordion
+                                                                        disabled={(usuarioActivo?.role == "admin" || usuarioActivo?.role == "super admin") ? false : true}
+                                                                        defaultExpanded={dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length >= 49 && dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length <= 97 ? true : false}>
+                                                                        <AccordionSummary
+                                                                            expandIcon={<ArrowDown style={{ display: (usuarioActivo?.role == "admin" || usuarioActivo?.role == "super admin") ? "block" : "none" }} className="rounded-full bg-slate-300 h-6 w-6 p-1" />}
+                                                                            aria-controls="panel1-content"
+                                                                            id="panel1-header"
+                                                                        >
+                                                                            <Typography className="!text-lg !font-bold" component="span">Bus 2</Typography>
+                                                                        </AccordionSummary>
+                                                                        <AccordionDetails>
+                                                                            <div>
+                                                                                <div className='relative w-full h-[1220px] md:h-[900px] md:w-[400px] border-slate-300 rounded-md'>
+                                                                                    <div className='scale-100 -mt-2 flex flex-col md:flex-row justify-start items-start gap-2'>
+                                                                                        <div className='scale-100 -mt-2 flex justify-center items-center gap-2'>
+                                                                                            <Circle className="h-5 w-5 bg-[#61baed] rounded-full" />
+                                                                                            <div>
+                                                                                                <h1 className='text-md font-bold'>
+                                                                                                    {`${"Asiento Ocupado"}`}
+                                                                                                </h1>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div className='scale-100 -mt-2 flex justify-center items-center gap-2'>
+                                                                                            <Circle className="h-5 w-5 bg-[#fff] rounded-full" />
+                                                                                            <div>
+                                                                                                <h1 className='text-md font-bold'>
+                                                                                                    {`${"Asiento Disponible"}`}
+                                                                                                </h1>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <Bus5098 {...{ handleClickInformation }} />
+                                                                                </div>
+                                                                            </div>
+                                                                        </AccordionDetails>
+                                                                    </Accordion>
+                                                                }
+                                                                {
+                                                                    (dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length >= 98) &&
+                                                                    <Accordion
+                                                                        disabled={(usuarioActivo?.role == "admin" || usuarioActivo?.role == "super admin") ? false : true}
+                                                                        defaultExpanded={dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length >= 98 && dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length <= 145 ? true : false}>
+                                                                        <AccordionSummary
+                                                                            expandIcon={<ArrowDown style={{ display: (usuarioActivo?.role == "admin" || usuarioActivo?.role == "super admin") ? "block" : "none" }} className="rounded-full bg-slate-300 h-6 w-6 p-1" />}
+                                                                            aria-controls="panel1-content"
+                                                                            id="panel1-header"
+                                                                        >
+                                                                            <Typography className="!text-lg !font-bold" component="span">Bus 3</Typography>
+                                                                        </AccordionSummary>
+                                                                        <AccordionDetails>
+                                                                            <div>
+                                                                                <div className='relative w-full h-[1220px] md:h-[900px] md:w-[400px] border-slate-300 rounded-md'>
+                                                                                    <div className='scale-100 -mt-2 flex flex-col md:flex-row justify-start items-start gap-2'>
+                                                                                        <div className='scale-100 -mt-2 flex justify-center items-center gap-2'>
+                                                                                            <Circle className="h-5 w-5 bg-[#61baed] rounded-full" />
+                                                                                            <div>
+                                                                                                <h1 className='text-md font-bold'>
+                                                                                                    {`${"Asiento Ocupado"}`}
+                                                                                                </h1>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div className='scale-100 -mt-2 flex justify-center items-center gap-2'>
+                                                                                            <Circle className="h-5 w-5 bg-[#fff] rounded-full" />
+                                                                                            <div>
+                                                                                                <h1 className='text-md font-bold'>
+                                                                                                    {`${"Asiento Disponible"}`}
+                                                                                                </h1>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <Bus99146 {...{ handleClickInformation }} />
+                                                                                </div>
+                                                                            </div>
+                                                                        </AccordionDetails>
+                                                                    </Accordion>
+                                                                }
+                                                                {
+                                                                    (dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length >= 146 && dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length <= 193) &&
+                                                                    <Accordion
+                                                                        disabled={(usuarioActivo?.role == "admin" || usuarioActivo?.role == "super admin") ? false : true}
+                                                                        defaultExpanded={dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length >= 146 && dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length <= 193 ? true : false}>
+                                                                        <AccordionSummary
+                                                                            expandIcon={<ArrowDown style={{ display: (usuarioActivo?.role == "admin" || usuarioActivo?.role == "super admin") ? "block" : "none" }} className="rounded-full bg-slate-300 h-6 w-6 p-1" />}
+                                                                            aria-controls="panel1-content"
+                                                                            id="panel1-header"
+                                                                        >
+                                                                            <Typography className="!text-lg !font-bold" component="span">Bus 4</Typography>
+                                                                        </AccordionSummary>
+                                                                        <AccordionDetails>
+                                                                            <div>
+                                                                                <div className='relative w-full h-[1220px] md:h-[900px] md:w-[400px] border-slate-300 rounded-md'>
+                                                                                    <div className='scale-100 -mt-2 flex flex-col md:flex-row justify-start items-start gap-2'>
+                                                                                        <div className='scale-100 -mt-2 flex justify-center items-center gap-2'>
+                                                                                            <Circle className="h-5 w-5 bg-[#61baed] rounded-full" />
+                                                                                            <div>
+                                                                                                <h1 className='text-md font-bold'>
+                                                                                                    {`${"Asiento Ocupado"}`}
+                                                                                                </h1>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div className='scale-100 -mt-2 flex justify-center items-center gap-2'>
+                                                                                            <Circle className="h-5 w-5 bg-[#fff] rounded-full" />
+                                                                                            <div>
+                                                                                                <h1 className='text-md font-bold'>
+                                                                                                    {`${"Asiento Disponible"}`}
+                                                                                                </h1>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <Bus145194 {...{ handleClickInformation }} />
+                                                                                </div>
+                                                                            </div>
+                                                                        </AccordionDetails>
+                                                                    </Accordion>
+                                                                }
+                                                                {/* {
                                                             (dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length >= 194 && dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length <= 241) &&
                                                             <Accordion
                                                                 disabled={(usuarioActivo?.role == "admin" || usuarioActivo?.role == "super admin") ? false : true}
@@ -1655,69 +1702,291 @@ export default function Eventos() {
                                                                 </AccordionDetails>
                                                             </Accordion>
                                                         } */}
-                                                    </div>
+                                                            </div>
+                                                            :
+                                                            <div className="flex flex-col gap-2">
+                                                                {
+                                                                    dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length <= 48 &&
+                                                                    <Accordion
+                                                                        disabled={(usuarioActivo?.role == "admin" || usuarioActivo?.role == "super admin") ? false : true}
+                                                                        defaultExpanded={dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length <= 48 ? true : false}
+                                                                    >
+                                                                        <AccordionSummary
+                                                                            expandIcon={<ArrowDown style={{ display: (usuarioActivo?.role == "admin" || usuarioActivo?.role == "super admin") ? "block" : "none" }} className="rounded-full bg-slate-300 h-6 w-6 p-1" />}
+                                                                            aria-controls="panel1-content"
+                                                                            id="panel1-header"
+                                                                        >
+                                                                            {/* <Typography className="!text-lg !font-bold" component="span">Bus 1</Typography> */}
+                                                                        </AccordionSummary>
+                                                                        <AccordionDetails>
+                                                                            <div>
+                                                                                <div className='relative w-full h-[1220px] md:h-[900px] md:w-[400px] border-slate-300 rounded-md'>
+                                                                                    <div className='scale-100 -mt-2 flex flex-col md:flex-row justify-start items-start gap-2'>
+                                                                                        <div className='scale-100 -mt-2 flex justify-center items-center gap-2'>
+                                                                                            <Circle className="h-5 w-5 bg-[#61baed] rounded-full" />
+                                                                                            <div>
+                                                                                                <h1 className='text-md font-bold'>
+                                                                                                    {`${"Asiento Ocupado"}`}
+                                                                                                </h1>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div className='scale-100 -mt-2 flex justify-center items-center gap-2'>
+                                                                                            <Circle className="h-5 w-5 bg-[#fff] rounded-full" />
+                                                                                            <div>
+                                                                                                <h1 className='text-md font-bold'>
+                                                                                                    {`${"Asiento Disponible"}`}
+                                                                                                </h1>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <Bus149 {...{ handleClickInformation }} />
+                                                                                </div>
+                                                                            </div>
+                                                                        </AccordionDetails>
+                                                                    </Accordion>
+                                                                }
+                                                                {/* } */}
+                                                                {
+                                                                    (dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length >= 49 && dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length <= 97) &&
+                                                                    <Accordion
+                                                                        disabled={(usuarioActivo?.role == "admin" || usuarioActivo?.role == "super admin") ? false : true}
+                                                                        defaultExpanded={dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length >= 49 && dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length <= 97 ? true : false}>
+                                                                        <AccordionSummary
+                                                                            expandIcon={<ArrowDown style={{ display: (usuarioActivo?.role == "admin" || usuarioActivo?.role == "super admin") ? "block" : "none" }} className="rounded-full bg-slate-300 h-6 w-6 p-1" />}
+                                                                            aria-controls="panel1-content"
+                                                                            id="panel1-header"
+                                                                        >
+                                                                            {/* <Typography className="!text-lg !font-bold" component="span">Bus 2</Typography> */}
+                                                                        </AccordionSummary>
+                                                                        <AccordionDetails>
+                                                                            <div>
+                                                                                <div className='relative w-full h-[1220px] md:h-[900px] md:w-[400px] border-slate-300 rounded-md'>
+                                                                                    <div className='scale-100 -mt-2 flex flex-col md:flex-row justify-start items-start gap-2'>
+                                                                                        <div className='scale-100 -mt-2 flex justify-center items-center gap-2'>
+                                                                                            <Circle className="h-5 w-5 bg-[#61baed] rounded-full" />
+                                                                                            <div>
+                                                                                                <h1 className='text-md font-bold'>
+                                                                                                    {`${"Asiento Ocupado"}`}
+                                                                                                </h1>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div className='scale-100 -mt-2 flex justify-center items-center gap-2'>
+                                                                                            <Circle className="h-5 w-5 bg-[#fff] rounded-full" />
+                                                                                            <div>
+                                                                                                <h1 className='text-md font-bold'>
+                                                                                                    {`${"Asiento Disponible"}`}
+                                                                                                </h1>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <Bus5098 {...{ handleClickInformation }} />
+                                                                                </div>
+                                                                            </div>
+                                                                        </AccordionDetails>
+                                                                    </Accordion>
+                                                                }
+                                                                {
+                                                                    (dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length >= 98 && dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length <= 145) &&
+                                                                    <Accordion
+                                                                        disabled={(usuarioActivo?.role == "admin" || usuarioActivo?.role == "super admin") ? false : true}
+                                                                        defaultExpanded={dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length >= 98 && dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length <= 145 ? true : false}>
+                                                                        <AccordionSummary
+                                                                            expandIcon={<ArrowDown style={{ display: (usuarioActivo?.role == "admin" || usuarioActivo?.role == "super admin") ? "block" : "none" }} className="rounded-full bg-slate-300 h-6 w-6 p-1" />}
+                                                                            aria-controls="panel1-content"
+                                                                            id="panel1-header"
+                                                                        >
+                                                                            {/* <Typography className="!text-lg !font-bold" component="span">Bus 3</Typography> */}
+                                                                        </AccordionSummary>
+                                                                        <AccordionDetails>
+                                                                            <div>
+                                                                                <div className='relative w-full h-[1220px] md:h-[900px] md:w-[400px] border-slate-300 rounded-md'>
+                                                                                    <div className='scale-100 -mt-2 flex flex-col md:flex-row justify-start items-start gap-2'>
+                                                                                        <div className='scale-100 -mt-2 flex justify-center items-center gap-2'>
+                                                                                            <Circle className="h-5 w-5 bg-[#61baed] rounded-full" />
+                                                                                            <div>
+                                                                                                <h1 className='text-md font-bold'>
+                                                                                                    {`${"Asiento Ocupado"}`}
+                                                                                                </h1>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div className='scale-100 -mt-2 flex justify-center items-center gap-2'>
+                                                                                            <Circle className="h-5 w-5 bg-[#fff] rounded-full" />
+                                                                                            <div>
+                                                                                                <h1 className='text-md font-bold'>
+                                                                                                    {`${"Asiento Disponible"}`}
+                                                                                                </h1>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <Bus99146 {...{ handleClickInformation }} />
+                                                                                </div>
+                                                                            </div>
+                                                                        </AccordionDetails>
+                                                                    </Accordion>
+                                                                }
+                                                                {
+                                                                    (dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length >= 146 && dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length <= 193) &&
+                                                                    <Accordion
+                                                                        disabled={(usuarioActivo?.role == "admin" || usuarioActivo?.role == "super admin") ? false : true}
+                                                                        defaultExpanded={dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length >= 146 && dataAsientosComprados?.filter((x: any) => (x?.status == "1" || x?.status == "99"))?.length <= 193 ? true : false}>
+                                                                        <AccordionSummary
+                                                                            expandIcon={<ArrowDown style={{ display: (usuarioActivo?.role == "admin" || usuarioActivo?.role == "super admin") ? "block" : "none" }} className="rounded-full bg-slate-300 h-6 w-6 p-1" />}
+                                                                            aria-controls="panel1-content"
+                                                                            id="panel1-header"
+                                                                        >
+                                                                            {/* <Typography className="!text-lg !font-bold" component="span">Bus 4</Typography> */}
+                                                                        </AccordionSummary>
+                                                                        <AccordionDetails>
+                                                                            <div>
+                                                                                <div className='relative w-full h-[1220px] md:h-[900px] md:w-[400px] border-slate-300 rounded-md'>
+                                                                                    <div className='scale-100 -mt-2 flex flex-col md:flex-row justify-start items-start gap-2'>
+                                                                                        <div className='scale-100 -mt-2 flex justify-center items-center gap-2'>
+                                                                                            <Circle className="h-5 w-5 bg-[#61baed] rounded-full" />
+                                                                                            <div>
+                                                                                                <h1 className='text-md font-bold'>
+                                                                                                    {`${"Asiento Ocupado"}`}
+                                                                                                </h1>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div className='scale-100 -mt-2 flex justify-center items-center gap-2'>
+                                                                                            <Circle className="h-5 w-5 bg-[#fff] rounded-full" />
+                                                                                            <div>
+                                                                                                <h1 className='text-md font-bold'>
+                                                                                                    {`${"Asiento Disponible"}`}
+                                                                                                </h1>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <Bus145194 {...{ handleClickInformation }} />
+                                                                                </div>
+                                                                            </div>
+                                                                        </AccordionDetails>
+                                                                    </Accordion>
+                                                                }
+                                                            </div>
+                                                    }
                                                     <div className="flex flex-col gap-3 justify-start items-center">
-                                                        Asientos Seleccionados:
+                                                        {`Asientos Seleccionados: ${arrAsientoSeleccionados
+                                                            // ?.split(",")
+                                                            .map((seg: string) => {
+                                                                const part = seg.split("-")[1]?.trim();               // "50-01" -> "01"
+                                                                const n = Number(part);                               // "01" -> 1
+                                                                if (!Number.isFinite(n) || isNaN(n)) return "";      // manejar casos inválidos
+                                                                return String(((n - 1) % 49) + 2);                   // aplicar lógica 49 en 49 y devolver string
+                                                            })
+                                                            .filter(Boolean)                                       // quitar entradas vacías si las hay
+                                                            .join(", ")}`}
                                                         {
                                                             fields.length == 0
                                                                 ?
-                                                                <div className="text-xs text-[#ffc] font-bold ml-10 bg-red-500 rounded-md px-2 py-1">
-                                                                    "No ha seleccionado ningun asiento, SELECCIONE LOS ASIENTOS DISPONIBLES(COLOR BLANCO)"
-                                                                </div>
+                                                                "Ninguno"
                                                                 :
                                                                 (usuarioActivo?.role !== "admin" && usuarioActivo?.role !== "super admin" && usuarioActivo?.role !== "user asesor")
                                                                     ?
                                                                     <div>
-                                                                        <div className="text-left text-xs text-red-500 font-bold uppercase mb-4">
-                                                                            Completar Datos:
+                                                                        <div className="text-left text-[0.84rem] text-blue-700 font-bold uppercase mb-4 bg-white p-1 rounded-md shadow-lg">
+                                                                            {"COMPLETE DATOS PARA RESERVAR SU(S) ASIENTO(S):"}
                                                                         </div>
-                                                                        {
-                                                                            fields.map((item: any, index: any) => {
-                                                                                return (
-                                                                                    <div key={index} className="flex flex-col gap-1 justify-start items-start border border-slate-300 rounded-md px-3 py-2 shadow-lg">
-                                                                                        <div className="w-full flex gap-4 justify-between items-center pb-4">
-                                                                                            <div className="text-xs font-bold">
-                                                                                                {`Asiento: ${item.codAsiento?.split("-")[1]}`}
-                                                                                            </div>
-                                                                                            <div className="text-xs font-bold">
-                                                                                                {`Precio: S/.${changeDecimales(item.precio)}`}
-                                                                                            </div>
-                                                                                            {
-                                                                                                (index + 1 == fields.length) &&
-                                                                                                <div
-                                                                                                    className="cursor-pointer bg-red-500 text-white rounded-full p-1"
-                                                                                                    onClick={() => {
-                                                                                                        // if (Number(item.codAsiento?.split("-")[1]) !== 2) {
-                                                                                                        remove(index)
-                                                                                                        setIdAgregante(null)
-                                                                                                        setValorRef((prev: any) => Number(prev) - 1)
-                                                                                                        setChange1(!change1)
-                                                                                                        setArrAsientoSeleccionados((prev: any) => prev.filter((x: any) => x !== item.codAsiento))
-                                                                                                        // }
-                                                                                                    }}
-                                                                                                >
-                                                                                                    <div className="flex flex-row gap-1 justify-center items-center">
-                                                                                                        <X className="h-3 w-3" />
-                                                                                                        <div>Eliminar</div>
-                                                                                                    </div>
+                                                                        <div className="flex flex-col gap-3 justify-start items-center w-full">
+                                                                            {
+                                                                                fields.map((item: any, index: any) => {
+                                                                                    return (
+                                                                                        <div key={index} className="flex flex-col gap-1 justify-start items-start border border-slate-300 rounded-md px-3 py-2 shadow-lg bg-white text-black ">
+                                                                                            <div className="w-full flex gap-4 justify-between items-center pb-4">
+                                                                                                <div className="text-xs font-bold">
+                                                                                                    {`Asiento: ${[item.codAsiento]
+                                                                                                        // ?.split(",")
+                                                                                                        .map((seg: string) => {
+                                                                                                            const part = seg.split("-")[1]?.trim();               // "50-01" -> "01"
+                                                                                                            const n = Number(part);                               // "01" -> 1
+                                                                                                            if (!Number.isFinite(n) || isNaN(n)) return "";      // manejar casos inválidos
+                                                                                                            return String(((n - 1) % 49) + 2);                   // aplicar lógica 49 en 49 y devolver string
+                                                                                                        })
+                                                                                                        .filter(Boolean)                                       // quitar entradas vacías si las hay
+                                                                                                        .join(", ")}`}
                                                                                                 </div>
-                                                                                            }
-                                                                                        </div>
-                                                                                        <div className="flex flex-col gap-0 mb-3">
+                                                                                                <div className="text-xs font-bold">
+                                                                                                    {`Precio: S/.${changeDecimales(item.precio)}`}
+                                                                                                </div>
+                                                                                                {
+                                                                                                    (index + 1 == fields.length) &&
+                                                                                                    <div
+                                                                                                        className="cursor-pointer bg-red-500 text-white rounded-full p-1"
+                                                                                                        onClick={() => {
+                                                                                                            // if (Number(item.codAsiento?.split("-")[1]) !== 2) {
+                                                                                                            remove(index)
+                                                                                                            setIdAgregante(null)
+                                                                                                            setValorRef((prev: any) => Number(prev) - 1)
+                                                                                                            setChange1(!change1)
+                                                                                                            setArrAsientoSeleccionados((prev: any) => prev.filter((x: any) => x !== item.codAsiento))
+                                                                                                            // }
+                                                                                                        }}
+                                                                                                    >
+                                                                                                        <div className="flex flex-row gap-1 justify-center items-center">
+                                                                                                            <X className="h-4 w-4" />
+                                                                                                            <div></div>
+                                                                                                        </div>
+                                                                                                    </div>
+                                                                                                }
+                                                                                            </div>
+                                                                                            <div className="flex flex-col gap-0 mb-3">
+                                                                                                <Controller
+                                                                                                    name={`asientos[${index}].documentoUsuario`}
+                                                                                                    control={control}
+                                                                                                    rules={{
+                                                                                                        required: "El documento es obligatorio",
+                                                                                                        minLength: {
+                                                                                                            value: 8,
+                                                                                                            message: "Debe tener al menos 8 dígitos",
+                                                                                                        },
+                                                                                                    }}
+                                                                                                    render={({ field, fieldState }) => (
+                                                                                                        <TextField
+                                                                                                            {...field}
+                                                                                                            label="DNI"
+                                                                                                            variant="outlined"
+                                                                                                            size="small"
+                                                                                                            type="text"
+                                                                                                            fullWidth
+                                                                                                            // disabled={item.disabled}
+                                                                                                            error={!!fieldState.error}
+                                                                                                            helperText={fieldState.error?.message}
+                                                                                                            InputLabelProps={{
+                                                                                                                shrink: true,
+                                                                                                            }}
+                                                                                                            required={true}
+                                                                                                            onChange={(e) => {
+                                                                                                                let value = e.target.value;
+                                                                                                                if (value?.length > 12) value = value.slice(0, 12); // Máximo 12 caracteres
+                                                                                                                if (value.length === 8) {
+                                                                                                                    console.log("reniec");
+                                                                                                                    handleApiReniec2(value, "dniCliente", setValue, apiCall, index);
+                                                                                                                }
+
+                                                                                                                field.onChange(value);
+                                                                                                            }}
+                                                                                                        />
+                                                                                                    )}
+                                                                                                />
+                                                                                                <div className="text-xs text-blue-500 font-bold uppercase">
+                                                                                                    {`${getValues()?.asientos?.[index]?.nombres ?? ""} ${getValues()?.asientos?.[index]?.apellidoPaterno ?? ""} ${getValues()?.asientos?.[index]?.apellidoMaterno ?? ""}`}
+                                                                                                </div>
+                                                                                            </div>
                                                                                             <Controller
-                                                                                                name={`asientos[${index}].documentoUsuario`}
+                                                                                                name={`asientos.${index}.celular`}
                                                                                                 control={control}
                                                                                                 rules={{
-                                                                                                    required: "El documento es obligatorio",
-                                                                                                    minLength: {
-                                                                                                        value: 8,
-                                                                                                        message: "Debe tener al menos 8 dígitos",
+                                                                                                    required: "El celular es obligatorio",
+                                                                                                    pattern: {
+                                                                                                        value: /^[0-9]{9}$/,
+                                                                                                        message: "Debe tener 9 dígitos numéricos",
                                                                                                     },
                                                                                                 }}
                                                                                                 render={({ field, fieldState }) => (
                                                                                                     <TextField
                                                                                                         {...field}
-                                                                                                        label="Documento Usuario"
+                                                                                                        required={true}
+                                                                                                        label="Celular"
                                                                                                         variant="outlined"
                                                                                                         size="small"
                                                                                                         type="text"
@@ -1728,57 +1997,14 @@ export default function Eventos() {
                                                                                                         InputLabelProps={{
                                                                                                             shrink: true,
                                                                                                         }}
-                                                                                                        required={true}
                                                                                                         onChange={(e) => {
                                                                                                             let value = e.target.value;
-                                                                                                            if (value?.length > 12) value = value.slice(0, 12); // Máximo 12 caracteres
-                                                                                                            if (value.length === 8) {
-                                                                                                                console.log("reniec");
-                                                                                                                handleApiReniec2(value, "dniCliente", setValue, apiCall, index);
-                                                                                                            }
-
                                                                                                             field.onChange(value);
                                                                                                         }}
                                                                                                     />
                                                                                                 )}
                                                                                             />
-                                                                                            <div className="text-xs text-blue-500 font-bold uppercase">
-                                                                                                {`${getValues()?.asientos?.[index]?.nombres ?? ""} ${getValues()?.asientos?.[index]?.apellidoPaterno ?? ""} ${getValues()?.asientos?.[index]?.apellidoMaterno ?? ""}`}
-                                                                                            </div>
-                                                                                        </div>
-                                                                                        <Controller
-                                                                                            name={`asientos.${index}.celular`}
-                                                                                            control={control}
-                                                                                            rules={{
-                                                                                                required: "El celular es obligatorio",
-                                                                                                pattern: {
-                                                                                                    value: /^[0-9]{9}$/,
-                                                                                                    message: "Debe tener 9 dígitos numéricos",
-                                                                                                },
-                                                                                            }}
-                                                                                            render={({ field, fieldState }) => (
-                                                                                                <TextField
-                                                                                                    {...field}
-                                                                                                    required={true}
-                                                                                                    label="Celular"
-                                                                                                    variant="outlined"
-                                                                                                    size="small"
-                                                                                                    type="text"
-                                                                                                    fullWidth
-                                                                                                    // disabled={item.disabled}
-                                                                                                    error={!!fieldState.error}
-                                                                                                    helperText={fieldState.error?.message}
-                                                                                                    InputLabelProps={{
-                                                                                                        shrink: true,
-                                                                                                    }}
-                                                                                                    onChange={(e) => {
-                                                                                                        let value = e.target.value;
-                                                                                                        field.onChange(value);
-                                                                                                    }}
-                                                                                                />
-                                                                                            )}
-                                                                                        />
-                                                                                        {/* <Controller
+                                                                                            {/* <Controller
                                                                                             name={`asientos.${index}.email`}
                                                                                             control={control}
                                                                                             // rules={{
@@ -1810,29 +2036,17 @@ export default function Eventos() {
                                                                                                 />
                                                                                             )}
                                                                                         /> */}
-                                                                                        <div className="w-full">
-                                                                                            <Controller
-                                                                                                name={`asientos.${index}.paradero`}
-                                                                                                control={control}
-                                                                                                rules={{
-                                                                                                    required: "Debe seleccionar un paradero",
-                                                                                                }}
-                                                                                                render={({ field, fieldState }) => (
-                                                                                                    <Autocomplete
-                                                                                                        options={
-                                                                                                            info?.destino == 1 ?
-                                                                                                                [
-                                                                                                                    { value: 1, label: "Orbes" },
-                                                                                                                    { value: 2, label: "Tottus Atocongo" },
-                                                                                                                    { value: 3, label: "Parque Zonal" },
-                                                                                                                    { value: 4, label: "Puente San Luis" },
-                                                                                                                    { value: 5, label: "Km. 40" },
-                                                                                                                    { value: 6, label: "Pucusana" },
-                                                                                                                    { value: 7, label: "Ñaña" },
-                                                                                                                    { value: 8, label: "Tottus Puente Piedra" },
-                                                                                                                ]
-                                                                                                                :
-                                                                                                                info?.destino == 0 ?
+                                                                                            <div className="w-full">
+                                                                                                <Controller
+                                                                                                    name={`asientos.${index}.paradero`}
+                                                                                                    control={control}
+                                                                                                    rules={{
+                                                                                                        required: "Debe seleccionar un paradero",
+                                                                                                    }}
+                                                                                                    render={({ field, fieldState }) => (
+                                                                                                        <Autocomplete
+                                                                                                            options={
+                                                                                                                info?.destino == 1 ?
                                                                                                                     [
                                                                                                                         { value: 1, label: "Orbes" },
                                                                                                                         { value: 2, label: "Tottus Atocongo" },
@@ -1840,29 +2054,29 @@ export default function Eventos() {
                                                                                                                         { value: 4, label: "Puente San Luis" },
                                                                                                                         { value: 5, label: "Km. 40" },
                                                                                                                         { value: 6, label: "Pucusana" },
-                                                                                                                        { value: 7, label: "Cerro Azul" },
-                                                                                                                        { value: 8, label: "Ñaña" },
-                                                                                                                        { value: 9, label: "Tottus Puente Piedra" },
+                                                                                                                        { value: 7, label: "Ñaña" },
+                                                                                                                        { value: 8, label: "Tottus Puente Piedra" },
                                                                                                                     ]
                                                                                                                     :
-                                                                                                                    []
-                                                                                                        }
-                                                                                                        getOptionLabel={(option) => option.label}
-                                                                                                        isOptionEqualToValue={(option, value) => option.value === value.value}
-                                                                                                        value={(
-                                                                                                            info?.destino == 1 ?
-                                                                                                                [
-                                                                                                                    { value: 1, label: "Orbes" },
-                                                                                                                    { value: 2, label: "Tottus Atocongo" },
-                                                                                                                    { value: 3, label: "Parque Zonal" },
-                                                                                                                    { value: 4, label: "Puente San Luis" },
-                                                                                                                    { value: 5, label: "Km. 40" },
-                                                                                                                    { value: 6, label: "Pucusana" },
-                                                                                                                    { value: 7, label: "Ñaña" },
-                                                                                                                    { value: 8, label: "Tottus Puente Piedra" },
-                                                                                                                ]
-                                                                                                                :
-                                                                                                                info?.destino == 0 ?
+                                                                                                                    info?.destino == 0 ?
+                                                                                                                        [
+                                                                                                                            { value: 1, label: "Orbes" },
+                                                                                                                            { value: 2, label: "Tottus Atocongo" },
+                                                                                                                            { value: 3, label: "Parque Zonal" },
+                                                                                                                            { value: 4, label: "Puente San Luis" },
+                                                                                                                            { value: 5, label: "Km. 40" },
+                                                                                                                            { value: 6, label: "Pucusana" },
+                                                                                                                            { value: 7, label: "Cerro Azul" },
+                                                                                                                            { value: 8, label: "Ñaña" },
+                                                                                                                            { value: 9, label: "Tottus Puente Piedra" },
+                                                                                                                        ]
+                                                                                                                        :
+                                                                                                                        []
+                                                                                                            }
+                                                                                                            getOptionLabel={(option) => option.label}
+                                                                                                            isOptionEqualToValue={(option, value) => option.value === value.value}
+                                                                                                            value={(
+                                                                                                                info?.destino == 1 ?
                                                                                                                     [
                                                                                                                         { value: 1, label: "Orbes" },
                                                                                                                         { value: 2, label: "Tottus Atocongo" },
@@ -1870,101 +2084,167 @@ export default function Eventos() {
                                                                                                                         { value: 4, label: "Puente San Luis" },
                                                                                                                         { value: 5, label: "Km. 40" },
                                                                                                                         { value: 6, label: "Pucusana" },
-                                                                                                                        { value: 7, label: "Cerro Azul" },
-                                                                                                                        { value: 8, label: "Ñaña" },
-                                                                                                                        { value: 9, label: "Tottus Puente Piedra" },
+                                                                                                                        { value: 7, label: "Ñaña" },
+                                                                                                                        { value: 8, label: "Tottus Puente Piedra" },
                                                                                                                     ]
                                                                                                                     :
-                                                                                                                    []
-                                                                                                        ).find((opt: any) => opt.value === field.value) || null}
-                                                                                                        onChange={(_, selectedOption) => {
-                                                                                                            field.onChange(selectedOption?.value ?? null);
-                                                                                                        }}
-                                                                                                        renderInput={(params) => (
-                                                                                                            <TextField
-                                                                                                                {...params}
-                                                                                                                required={true}
-                                                                                                                label={"Paradero"}
-                                                                                                                margin="dense"
-                                                                                                                fullWidth
-                                                                                                                sx={{
-                                                                                                                    height: "40px",
-                                                                                                                    padding: "0px",
-                                                                                                                    margin: "0px",
-                                                                                                                    "& .MuiOutlinedInput-notchedOutline": {
-                                                                                                                        // borderColor: "transparent",
-                                                                                                                        height: "45px",
-                                                                                                                        paddingBottom: "5px",
-                                                                                                                        marginBottom: "5px",
-                                                                                                                    },
-                                                                                                                }}
-                                                                                                                error={!!fieldState.error}
-                                                                                                                helperText={fieldState.error?.message}
-                                                                                                            />
-                                                                                                        )}
-                                                                                                    />
-                                                                                                )}
-                                                                                            />
+                                                                                                                    info?.destino == 0 ?
+                                                                                                                        [
+                                                                                                                            { value: 1, label: "Orbes" },
+                                                                                                                            { value: 2, label: "Tottus Atocongo" },
+                                                                                                                            { value: 3, label: "Parque Zonal" },
+                                                                                                                            { value: 4, label: "Puente San Luis" },
+                                                                                                                            { value: 5, label: "Km. 40" },
+                                                                                                                            { value: 6, label: "Pucusana" },
+                                                                                                                            { value: 7, label: "Cerro Azul" },
+                                                                                                                            { value: 8, label: "Ñaña" },
+                                                                                                                            { value: 9, label: "Tottus Puente Piedra" },
+                                                                                                                        ]
+                                                                                                                        :
+                                                                                                                        []
+                                                                                                            ).find((opt: any) => opt.value === field.value) || null}
+                                                                                                            onChange={(_, selectedOption) => {
+                                                                                                                field.onChange(selectedOption?.value ?? null);
+                                                                                                            }}
+                                                                                                            renderInput={(params) => (
+                                                                                                                <TextField
+                                                                                                                    {...params}
+                                                                                                                    required={true}
+                                                                                                                    label={"Paradero"}
+                                                                                                                    margin="dense"
+                                                                                                                    fullWidth
+                                                                                                                    sx={{
+                                                                                                                        height: "40px",
+                                                                                                                        padding: "0px",
+                                                                                                                        margin: "0px",
+                                                                                                                        "& .MuiOutlinedInput-notchedOutline": {
+                                                                                                                            // borderColor: "transparent",
+                                                                                                                            height: "45px",
+                                                                                                                            paddingBottom: "5px",
+                                                                                                                            marginBottom: "5px",
+                                                                                                                        },
+                                                                                                                    }}
+                                                                                                                    error={!!fieldState.error}
+                                                                                                                    helperText={fieldState.error?.message}
+                                                                                                                />
+                                                                                                            )}
+                                                                                                        />
+                                                                                                    )}
+                                                                                                />
+                                                                                            </div>
                                                                                         </div>
-                                                                                    </div>
-                                                                                )
-                                                                            })
-                                                                        }
+                                                                                    )
+                                                                                })
+                                                                            }
+                                                                        </div>
                                                                     </div>
                                                                     :
                                                                     (usuarioActivo?.role == "admin" || usuarioActivo?.role == "super admin" || usuarioActivo?.role == "user asesor")
                                                                     &&
                                                                     <div>
-                                                                        <div className="text-left text-xs text-red-500 font-bold uppercase mb-4">
-                                                                            Completar Datos:
+                                                                        <div className="text-left text-[0.84rem] text-blue-700 font-bold uppercase mb-4 bg-white p-1 rounded-md shadow-lg">
+                                                                            {"COMPLETE DATOS PARA RESERVAR SU(S) ASIENTO(S):"}
                                                                         </div>
-                                                                        {
-                                                                            fields.map((item: any, index: any) => {
-                                                                                return (
-                                                                                    <div key={index} className="flex flex-col gap-1 justify-start items-start border border-slate-300 rounded-md px-3 py-2 shadow-lg">
-                                                                                        <div className="w-full flex gap-4 justify-between items-center pb-4">
-                                                                                            <div className="text-xs font-bold">
-                                                                                                {`Asiento: ${item.codAsiento?.split("-")[1]}`}
-                                                                                            </div>
-                                                                                            <div className="text-xs font-bold">
-                                                                                                {`Precio: S/.${changeDecimales(item.precio)}`}
-                                                                                            </div>
-                                                                                            {
-                                                                                                (index + 1 == fields.length) &&
-                                                                                                <div
-                                                                                                    className="cursor-pointer bg-red-500 text-white rounded-full p-1"
-                                                                                                    onClick={() => {
-                                                                                                        // if (Number(item.codAsiento?.split("-")[1]) !== 2) {
-                                                                                                        remove(index)
-                                                                                                        setIdAgregante(null)
-                                                                                                        setValorRef((prev: any) => Number(prev) - 1)
-                                                                                                        setChange1(!change1)
-                                                                                                        setArrAsientoSeleccionados((prev: any) => prev.filter((x: any) => x !== item.codAsiento))
-                                                                                                        // }
-                                                                                                    }}
-                                                                                                >
-                                                                                                    <div className="flex flex-row gap-1 justify-center items-center">
-                                                                                                        <X className="h-3 w-3" />
-                                                                                                        <div>Eliminar</div>
-                                                                                                    </div>
+                                                                        <div className="flex flex-col gap-3 justify-start items-center w-full">
+                                                                            {
+                                                                                fields.map((item: any, index: any) => {
+                                                                                    return (
+                                                                                        <div key={index} className="flex flex-col gap-1 justify-start items-start border border-slate-300 rounded-md px-3 py-2 shadow-lg bg-white text-black">
+                                                                                            <div className="w-full flex gap-4 justify-between items-center pb-4">
+                                                                                                <div className="text-xs font-bold">
+                                                                                                    {`Asiento: ${[item.codAsiento]
+                                                                                                        // ?.split(",")
+                                                                                                        .map((seg: string) => {
+                                                                                                            const part = seg.split("-")[1]?.trim();               // "50-01" -> "01"
+                                                                                                            const n = Number(part);                               // "01" -> 1
+                                                                                                            if (!Number.isFinite(n) || isNaN(n)) return "";      // manejar casos inválidos
+                                                                                                            return String(((n - 1) % 49) + 2);                   // aplicar lógica 49 en 49 y devolver string
+                                                                                                        })
+                                                                                                        .filter(Boolean)                                       // quitar entradas vacías si las hay
+                                                                                                        .join(", ")}`}
                                                                                                 </div>
-                                                                                            }
-                                                                                        </div>
-                                                                                        <div className="flex flex-col gap-0 mb-3">
+                                                                                                <div className="text-xs font-bold">
+                                                                                                    {`Precio: S/.${changeDecimales(item.precio)}`}
+                                                                                                </div>
+                                                                                                {
+                                                                                                    (index + 1 == fields.length) &&
+                                                                                                    <div
+                                                                                                        className="cursor-pointer bg-red-500 text-white rounded-full p-1"
+                                                                                                        onClick={() => {
+                                                                                                            // if (Number(item.codAsiento?.split("-")[1]) !== 2) {
+                                                                                                            remove(index)
+                                                                                                            setIdAgregante(null)
+                                                                                                            setValorRef((prev: any) => Number(prev) - 1)
+                                                                                                            setChange1(!change1)
+                                                                                                            setArrAsientoSeleccionados((prev: any) => prev.filter((x: any) => x !== item.codAsiento))
+                                                                                                            // }
+                                                                                                        }}
+                                                                                                    >
+                                                                                                        <div className="flex flex-row gap-1 justify-center items-center">
+                                                                                                            <X className="h-4 w-4" />
+                                                                                                            <div></div>
+                                                                                                        </div>
+                                                                                                    </div>
+                                                                                                }
+                                                                                            </div>
+                                                                                            <div className="flex flex-col gap-0 mb-3">
+                                                                                                <Controller
+                                                                                                    name={`asientos[${index}].documentoUsuario`}
+                                                                                                    control={control}
+                                                                                                    rules={{
+                                                                                                        required: "El documento es obligatorio",
+                                                                                                        minLength: {
+                                                                                                            value: 8,
+                                                                                                            message: "Debe tener al menos 8 dígitos",
+                                                                                                        },
+                                                                                                    }}
+                                                                                                    render={({ field, fieldState }) => (
+                                                                                                        <TextField
+                                                                                                            {...field}
+                                                                                                            label="DNI"
+                                                                                                            variant="outlined"
+                                                                                                            size="small"
+                                                                                                            type="text"
+                                                                                                            fullWidth
+                                                                                                            // disabled={item.disabled}
+                                                                                                            error={!!fieldState.error}
+                                                                                                            helperText={fieldState.error?.message}
+                                                                                                            InputLabelProps={{
+                                                                                                                shrink: true,
+                                                                                                            }}
+                                                                                                            required={true}
+                                                                                                            onChange={(e) => {
+                                                                                                                let value = e.target.value;
+                                                                                                                if (value?.length > 12) value = value.slice(0, 12); // Máximo 12 caracteres
+                                                                                                                if (value.length === 8) {
+                                                                                                                    console.log("reniec");
+                                                                                                                    handleApiReniec2(value, "dniCliente", setValue, apiCall, index);
+                                                                                                                }
+
+                                                                                                                field.onChange(value);
+                                                                                                            }}
+                                                                                                        />
+                                                                                                    )}
+                                                                                                />
+                                                                                                <div className="text-xs text-blue-500 font-bold uppercase">
+                                                                                                    {`${getValues()?.asientos?.[index]?.nombres ?? ""} ${getValues()?.asientos?.[index]?.apellidoPaterno ?? ""} ${getValues()?.asientos?.[index]?.apellidoMaterno ?? ""}`}
+                                                                                                </div>
+                                                                                            </div>
                                                                                             <Controller
-                                                                                                name={`asientos[${index}].documentoUsuario`}
+                                                                                                name={`asientos.${index}.celular`}
                                                                                                 control={control}
                                                                                                 rules={{
-                                                                                                    required: "El documento es obligatorio",
-                                                                                                    minLength: {
-                                                                                                        value: 8,
-                                                                                                        message: "Debe tener al menos 8 dígitos",
+                                                                                                    required: "El celular es obligatorio",
+                                                                                                    pattern: {
+                                                                                                        value: /^[0-9]{9}$/,
+                                                                                                        message: "Debe tener 9 dígitos numéricos",
                                                                                                     },
                                                                                                 }}
                                                                                                 render={({ field, fieldState }) => (
                                                                                                     <TextField
                                                                                                         {...field}
-                                                                                                        label="Documento Usuario"
+                                                                                                        required={true}
+                                                                                                        label="Celular"
                                                                                                         variant="outlined"
                                                                                                         size="small"
                                                                                                         type="text"
@@ -1975,57 +2255,14 @@ export default function Eventos() {
                                                                                                         InputLabelProps={{
                                                                                                             shrink: true,
                                                                                                         }}
-                                                                                                        required={true}
                                                                                                         onChange={(e) => {
                                                                                                             let value = e.target.value;
-                                                                                                            if (value?.length > 12) value = value.slice(0, 12); // Máximo 12 caracteres
-                                                                                                            if (value.length === 8) {
-                                                                                                                console.log("reniec");
-                                                                                                                handleApiReniec2(value, "dniCliente", setValue, apiCall, index);
-                                                                                                            }
-
                                                                                                             field.onChange(value);
                                                                                                         }}
                                                                                                     />
                                                                                                 )}
                                                                                             />
-                                                                                            <div className="text-xs text-blue-500 font-bold uppercase">
-                                                                                                {`${getValues()?.asientos?.[index]?.nombres ?? ""} ${getValues()?.asientos?.[index]?.apellidoPaterno ?? ""} ${getValues()?.asientos?.[index]?.apellidoMaterno ?? ""}`}
-                                                                                            </div>
-                                                                                        </div>
-                                                                                        <Controller
-                                                                                            name={`asientos.${index}.celular`}
-                                                                                            control={control}
-                                                                                            rules={{
-                                                                                                required: "El celular es obligatorio",
-                                                                                                pattern: {
-                                                                                                    value: /^[0-9]{9}$/,
-                                                                                                    message: "Debe tener 9 dígitos numéricos",
-                                                                                                },
-                                                                                            }}
-                                                                                            render={({ field, fieldState }) => (
-                                                                                                <TextField
-                                                                                                    {...field}
-                                                                                                    required={true}
-                                                                                                    label="Celular"
-                                                                                                    variant="outlined"
-                                                                                                    size="small"
-                                                                                                    type="text"
-                                                                                                    fullWidth
-                                                                                                    // disabled={item.disabled}
-                                                                                                    error={!!fieldState.error}
-                                                                                                    helperText={fieldState.error?.message}
-                                                                                                    InputLabelProps={{
-                                                                                                        shrink: true,
-                                                                                                    }}
-                                                                                                    onChange={(e) => {
-                                                                                                        let value = e.target.value;
-                                                                                                        field.onChange(value);
-                                                                                                    }}
-                                                                                                />
-                                                                                            )}
-                                                                                        />
-                                                                                        {/* <Controller
+                                                                                            {/* <Controller
                                                                                             name={`asientos.${index}.email`}
                                                                                             control={control}
                                                                                             // rules={{
@@ -2057,29 +2294,17 @@ export default function Eventos() {
                                                                                                 />
                                                                                             )}
                                                                                         /> */}
-                                                                                        <div className="w-full">
-                                                                                            <Controller
-                                                                                                name={`asientos.${index}.paradero`}
-                                                                                                control={control}
-                                                                                                rules={{
-                                                                                                    required: "Debe seleccionar un paradero",
-                                                                                                }}
-                                                                                                render={({ field, fieldState }) => (
-                                                                                                    <Autocomplete
-                                                                                                        options={
-                                                                                                            info?.destino == 1 ?
-                                                                                                                [
-                                                                                                                    { value: 1, label: "Orbes" },
-                                                                                                                    { value: 2, label: "Tottus Atocongo" },
-                                                                                                                    { value: 3, label: "Parque Zonal" },
-                                                                                                                    { value: 4, label: "Puente San Luis" },
-                                                                                                                    { value: 5, label: "Km. 40" },
-                                                                                                                    { value: 6, label: "Pucusana" },
-                                                                                                                    { value: 7, label: "Ñaña" },
-                                                                                                                    { value: 8, label: "Tottus Puente Piedra" },
-                                                                                                                ]
-                                                                                                                :
-                                                                                                                info?.destino == 0 ?
+                                                                                            <div className="w-full">
+                                                                                                <Controller
+                                                                                                    name={`asientos.${index}.paradero`}
+                                                                                                    control={control}
+                                                                                                    rules={{
+                                                                                                        required: "Debe seleccionar un paradero",
+                                                                                                    }}
+                                                                                                    render={({ field, fieldState }) => (
+                                                                                                        <Autocomplete
+                                                                                                            options={
+                                                                                                                info?.destino == 1 ?
                                                                                                                     [
                                                                                                                         { value: 1, label: "Orbes" },
                                                                                                                         { value: 2, label: "Tottus Atocongo" },
@@ -2087,29 +2312,29 @@ export default function Eventos() {
                                                                                                                         { value: 4, label: "Puente San Luis" },
                                                                                                                         { value: 5, label: "Km. 40" },
                                                                                                                         { value: 6, label: "Pucusana" },
-                                                                                                                        { value: 7, label: "Cerro Azul" },
-                                                                                                                        { value: 8, label: "Ñaña" },
-                                                                                                                        { value: 9, label: "Tottus Puente Piedra" },
+                                                                                                                        { value: 7, label: "Ñaña" },
+                                                                                                                        { value: 8, label: "Tottus Puente Piedra" },
                                                                                                                     ]
                                                                                                                     :
-                                                                                                                    []
-                                                                                                        }
-                                                                                                        getOptionLabel={(option) => option.label}
-                                                                                                        isOptionEqualToValue={(option, value) => option.value === value.value}
-                                                                                                        value={(
-                                                                                                            info?.destino == 1 ?
-                                                                                                                [
-                                                                                                                    { value: 1, label: "Orbes" },
-                                                                                                                    { value: 2, label: "Tottus Atocongo" },
-                                                                                                                    { value: 3, label: "Parque Zonal" },
-                                                                                                                    { value: 4, label: "Puente San Luis" },
-                                                                                                                    { value: 5, label: "Km. 40" },
-                                                                                                                    { value: 6, label: "Pucusana" },
-                                                                                                                    { value: 7, label: "Ñaña" },
-                                                                                                                    { value: 8, label: "Tottus Puente Piedra" },
-                                                                                                                ]
-                                                                                                                :
-                                                                                                                info?.destino == 0 ?
+                                                                                                                    info?.destino == 0 ?
+                                                                                                                        [
+                                                                                                                            { value: 1, label: "Orbes" },
+                                                                                                                            { value: 2, label: "Tottus Atocongo" },
+                                                                                                                            { value: 3, label: "Parque Zonal" },
+                                                                                                                            { value: 4, label: "Puente San Luis" },
+                                                                                                                            { value: 5, label: "Km. 40" },
+                                                                                                                            { value: 6, label: "Pucusana" },
+                                                                                                                            { value: 7, label: "Cerro Azul" },
+                                                                                                                            { value: 8, label: "Ñaña" },
+                                                                                                                            { value: 9, label: "Tottus Puente Piedra" },
+                                                                                                                        ]
+                                                                                                                        :
+                                                                                                                        []
+                                                                                                            }
+                                                                                                            getOptionLabel={(option) => option.label}
+                                                                                                            isOptionEqualToValue={(option, value) => option.value === value.value}
+                                                                                                            value={(
+                                                                                                                info?.destino == 1 ?
                                                                                                                     [
                                                                                                                         { value: 1, label: "Orbes" },
                                                                                                                         { value: 2, label: "Tottus Atocongo" },
@@ -2117,46 +2342,59 @@ export default function Eventos() {
                                                                                                                         { value: 4, label: "Puente San Luis" },
                                                                                                                         { value: 5, label: "Km. 40" },
                                                                                                                         { value: 6, label: "Pucusana" },
-                                                                                                                        { value: 7, label: "Cerro Azul" },
-                                                                                                                        { value: 8, label: "Ñaña" },
-                                                                                                                        { value: 9, label: "Tottus Puente Piedra" },
+                                                                                                                        { value: 7, label: "Ñaña" },
+                                                                                                                        { value: 8, label: "Tottus Puente Piedra" },
                                                                                                                     ]
                                                                                                                     :
-                                                                                                                    []
-                                                                                                        ).find((opt: any) => opt.value === field.value) || null}
-                                                                                                        onChange={(_, selectedOption) => {
-                                                                                                            field.onChange(selectedOption?.value ?? null);
-                                                                                                        }}
-                                                                                                        renderInput={(params) => (
-                                                                                                            <TextField
-                                                                                                                {...params}
-                                                                                                                required={true}
-                                                                                                                label={"Paradero"}
-                                                                                                                margin="dense"
-                                                                                                                fullWidth
-                                                                                                                sx={{
-                                                                                                                    height: "40px",
-                                                                                                                    padding: "0px",
-                                                                                                                    margin: "0px",
-                                                                                                                    "& .MuiOutlinedInput-notchedOutline": {
-                                                                                                                        // borderColor: "transparent",
-                                                                                                                        height: "45px",
-                                                                                                                        paddingBottom: "5px",
-                                                                                                                        marginBottom: "5px",
-                                                                                                                    },
-                                                                                                                }}
-                                                                                                                error={!!fieldState.error}
-                                                                                                                helperText={fieldState.error?.message}
-                                                                                                            />
-                                                                                                        )}
-                                                                                                    />
-                                                                                                )}
-                                                                                            />
+                                                                                                                    info?.destino == 0 ?
+                                                                                                                        [
+                                                                                                                            { value: 1, label: "Orbes" },
+                                                                                                                            { value: 2, label: "Tottus Atocongo" },
+                                                                                                                            { value: 3, label: "Parque Zonal" },
+                                                                                                                            { value: 4, label: "Puente San Luis" },
+                                                                                                                            { value: 5, label: "Km. 40" },
+                                                                                                                            { value: 6, label: "Pucusana" },
+                                                                                                                            { value: 7, label: "Cerro Azul" },
+                                                                                                                            { value: 8, label: "Ñaña" },
+                                                                                                                            { value: 9, label: "Tottus Puente Piedra" },
+                                                                                                                        ]
+                                                                                                                        :
+                                                                                                                        []
+                                                                                                            ).find((opt: any) => opt.value === field.value) || null}
+                                                                                                            onChange={(_, selectedOption) => {
+                                                                                                                field.onChange(selectedOption?.value ?? null);
+                                                                                                            }}
+                                                                                                            renderInput={(params) => (
+                                                                                                                <TextField
+                                                                                                                    {...params}
+                                                                                                                    required={true}
+                                                                                                                    label={"Paradero"}
+                                                                                                                    margin="dense"
+                                                                                                                    fullWidth
+                                                                                                                    sx={{
+                                                                                                                        height: "40px",
+                                                                                                                        padding: "0px",
+                                                                                                                        margin: "0px",
+                                                                                                                        "& .MuiOutlinedInput-notchedOutline": {
+                                                                                                                            // borderColor: "transparent",
+                                                                                                                            height: "45px",
+                                                                                                                            paddingBottom: "5px",
+                                                                                                                            marginBottom: "5px",
+                                                                                                                        },
+                                                                                                                    }}
+                                                                                                                    error={!!fieldState.error}
+                                                                                                                    helperText={fieldState.error?.message}
+                                                                                                                />
+                                                                                                            )}
+                                                                                                        />
+                                                                                                    )}
+                                                                                                />
+                                                                                            </div>
                                                                                         </div>
-                                                                                    </div>
-                                                                                )
-                                                                            })
-                                                                        }
+                                                                                    )
+                                                                                })
+                                                                            }
+                                                                        </div>
                                                                     </div>
                                                         }
                                                     </div>
@@ -2172,21 +2410,19 @@ export default function Eventos() {
                                                             onClick={() => {
                                                                 window.scrollTo({ top: document.body.scrollHeight, left: 0, behavior: 'smooth' });
                                                             }}
-                                                        // onClick={() => {
-                                                        //     setOpenPopup(true)
-                                                        //     setValue("comprarAsientos", true)
-                                                        //     setValue("pasarelaPay", false)
-                                                        //     setValue("siPasarelaPay", false)
-                                                        //     setValue("dataPoUp", {
-                                                        //         title: `Subir Voucher`,
-                                                        //         infoOrder: "new",
-                                                        //         action: "subirVoucher",
-                                                        //     })
-                                                        // }}
                                                         >
                                                             <div>
                                                                 <div>
-                                                                    {`Asiento(s) Seleccionado(s): ${arrAsientoSeleccionados?.map((x: any) => (x?.split("-")[1]))?.join(', ')}`}
+                                                                    {`Asiento(s) Seleccionado(s): ${arrAsientoSeleccionados
+                                                                        // ?.split(",")
+                                                                        .map((seg: string) => {
+                                                                            const part = seg.split("-")[1]?.trim();               // "50-01" -> "01"
+                                                                            const n = Number(part);                               // "01" -> 1
+                                                                            if (!Number.isFinite(n) || isNaN(n)) return "";      // manejar casos inválidos
+                                                                            return String(((n - 1) % 49) + 2);                   // aplicar lógica 49 en 49 y devolver string
+                                                                        })
+                                                                        .filter(Boolean)                                       // quitar entradas vacías si las hay
+                                                                        .join(", ")}`}
                                                                 </div>
                                                                 <div className="text-base text-white">
                                                                     {`Total: S/. ${changeDecimales(getValues()?.sumaTotalPago)}`}
@@ -2259,7 +2495,7 @@ export default function Eventos() {
                                                 render={({ field, fieldState }) => (
                                                     <TextField
                                                         {...field}
-                                                        label="Documento Usuario"
+                                                        label="DNI"
                                                         variant="outlined"
                                                         size="small"
                                                         type="text"

@@ -14,7 +14,7 @@ export const LoginForm = ({ handleSubmit, apiCall, onSubmit, getValues, setValue
   return (
     <div
       // id='fondo-oro-verde' 
-      className="w-full min-h-screen flex items-center justify-center !bg-oro-radial p-4 relative overflow-hidden bg-[#8dc5eb]"
+      className="w-full min-h-screen flex items-center justify-center !bg-oro-radial p-4 relative overflow-hidden bg-blue-500"
     >
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -24,7 +24,7 @@ export const LoginForm = ({ handleSubmit, apiCall, onSubmit, getValues, setValue
       >
         <div
           // id='fondo-oro-verde' 
-          className="shadow-2xl rounded-lg overflow-hidden bg-[#79b1d6]"
+          className="shadow-2xl rounded-lg overflow-hidden bg-blue-700"
         >
           <div className="p-8 relative">
             <div className="text-center mb-8">
@@ -38,8 +38,8 @@ export const LoginForm = ({ handleSubmit, apiCall, onSubmit, getValues, setValue
                 </div>
               </div>
               <h2 className="text-xl font-bold text-gray-800">Bienvenido a</h2>
-              <h2 className="text-2xl font-bold text-yellow-500">{"Eventos Muñoz"}</h2>
-              <p className="text-gray-600">Acceda a su cuenta exclusiva</p>
+              <h2 className="text-2xl font-bold text-yellow-500">{"Visitas Proyectos Muñoz"}</h2>
+              <p className="text-gray-900">Acceda a su cuenta exclusiva</p>
             </div>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               <div className="flex flex-col justify-center items-center gap-2 w-full">
