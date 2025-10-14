@@ -1388,6 +1388,8 @@ export default function Eventos() {
 
     }
 
+    const myDivRef = useRef<HTMLDivElement>(null);
+
     return (
         <div className="bg-cover bg-center h-[100vh]">
             <div
@@ -1865,7 +1867,7 @@ export default function Eventos() {
                                                                 }
                                                             </div>
                                                     }
-                                                    <div className="flex flex-col gap-3 justify-start items-center">
+                                                    <div ref={myDivRef} className="flex flex-col gap-3 justify-start items-center">
                                                         {`Asientos Seleccionados: ${arrAsientoSeleccionados
                                                             // ?.split(",")
                                                             .map((seg: string) => {
@@ -2408,7 +2410,14 @@ export default function Eventos() {
                                                             color={"success"}
                                                             type="submit"
                                                             onClick={() => {
-                                                                window.scrollTo({ top: document.body.scrollHeight, left: 0, behavior: 'smooth' });
+                                                                // window.scrollTo({ top: document.body.scrollHeight, left: 0, behavior: 'smooth' });
+                                                                if (myDivRef.current) {
+                                                                    const top = myDivRef.current.offsetTop; // posición del div
+                                                                    window.scrollTo({
+                                                                        top: top + 400, // 👈 sumamos 20px extra
+                                                                        behavior: "smooth", // desplazamiento suave
+                                                                    });
+                                                                }
                                                             }}
                                                         >
                                                             <div>
