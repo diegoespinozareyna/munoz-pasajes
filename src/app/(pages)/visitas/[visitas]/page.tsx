@@ -320,7 +320,7 @@ export default function Eventos() {
     useEffect(() => {
         fetchAsientosIdMatrix2()
         // usersPatrocinaddores()
-    }, [change1, getInitialNumerAsientos])
+    }, [change1, getInitialNumerAsientos, info])
 
     const fetchEventId = async (id: string | string[]) => {
         try {
@@ -1884,7 +1884,7 @@ export default function Eventos() {
                                                                 (usuarioActivo?.role !== "admin" && usuarioActivo?.role !== "super admin" && usuarioActivo?.role !== "user asesor")
                                                                     ?
                                                                     <div>
-                                                                        <div className="text-left text-[0.84rem] text-blue-700 font-bold uppercase mb-4 bg-white p-1 rounded-md shadow-lg">
+                                                                        <div className="text-center text-[0.84rem] text-blue-700 font-bold uppercase mb-4 bg-white p-1 rounded-md shadow-lg">
                                                                             {"COMPLETE DATOS PARA RESERVAR SU(S) ASIENTO(S):"}
                                                                         </div>
                                                                         <div className="flex flex-col gap-3 justify-start items-center w-full">
@@ -2142,7 +2142,7 @@ export default function Eventos() {
                                                                     (usuarioActivo?.role == "admin" || usuarioActivo?.role == "super admin" || usuarioActivo?.role == "user asesor")
                                                                     &&
                                                                     <div>
-                                                                        <div className="text-left text-[0.84rem] text-blue-700 font-bold uppercase mb-4 bg-white p-1 rounded-md shadow-lg">
+                                                                        <div className="text-center text-[0.84rem] text-blue-700 font-bold uppercase mb-4 bg-white p-1 rounded-md shadow-lg">
                                                                             {"COMPLETE DATOS PARA RESERVAR SU(S) ASIENTO(S):"}
                                                                         </div>
                                                                         <div className="flex flex-col gap-3 justify-start items-center w-full">
