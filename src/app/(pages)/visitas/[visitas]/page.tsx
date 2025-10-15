@@ -1570,7 +1570,7 @@ export default function Eventos() {
                                                                     </AccordionSummary>
                                                                     <AccordionDetails>
                                                                         <div>
-                                                                            <div className='relative w-full h-[1220px] md:h-[900px] md:w-[400px]'>
+                                                                            <div className='relative w-full md:h-[900px] md:w-[400px]'>
                                                                                 <div className='scale-100 -mt-2 flex flex-col md:flex-row justify-start items-start gap-2'>
                                                                                     <div className='scale-100 -mt-2 flex justify-center items-center gap-2'>
                                                                                         <Circle className="h-5 w-5 bg-[#61baed] rounded-full" />
@@ -1609,7 +1609,7 @@ export default function Eventos() {
                                                                         </AccordionSummary>
                                                                         <AccordionDetails>
                                                                             <div>
-                                                                                <div className='relative w-full h-[1220px] md:h-[900px] md:w-[400px] border-slate-300 rounded-md'>
+                                                                                <div className='relative w-full md:h-[900px] md:w-[400px] border-slate-300 rounded-md'>
                                                                                     <div className='scale-100 -mt-2 flex flex-col md:flex-row justify-start items-start gap-2'>
                                                                                         <div className='scale-100 -mt-2 flex justify-center items-center gap-2'>
                                                                                             <Circle className="h-5 w-5 bg-[#61baed] rounded-full" />
@@ -1648,7 +1648,7 @@ export default function Eventos() {
                                                                         </AccordionSummary>
                                                                         <AccordionDetails>
                                                                             <div>
-                                                                                <div className='relative w-full h-[1220px] md:h-[900px] md:w-[400px] border-slate-300 rounded-md'>
+                                                                                <div className='relative w-full md:h-[900px] md:w-[400px] border-slate-300 rounded-md'>
                                                                                     <div className='scale-100 -mt-2 flex flex-col md:flex-row justify-start items-start gap-2'>
                                                                                         <div className='scale-100 -mt-2 flex justify-center items-center gap-2'>
                                                                                             <Circle className="h-5 w-5 bg-[#61baed] rounded-full" />
@@ -1687,7 +1687,7 @@ export default function Eventos() {
                                                                         </AccordionSummary>
                                                                         <AccordionDetails>
                                                                             <div>
-                                                                                <div className='relative w-full h-[1220px] md:h-[900px] md:w-[400px] border-slate-300 rounded-md'>
+                                                                                <div className='relative w-full md:h-[900px] md:w-[400px] border-slate-300 rounded-md'>
                                                                                     <div className='scale-100 -mt-2 flex flex-col md:flex-row justify-start items-start gap-2'>
                                                                                         <div className='scale-100 -mt-2 flex justify-center items-center gap-2'>
                                                                                             <Circle className="h-5 w-5 bg-[#61baed] rounded-full" />
@@ -1726,7 +1726,7 @@ export default function Eventos() {
                                                                 </AccordionSummary>
                                                                 <AccordionDetails>
                                                                     <div>
-                                                                        <div className='relative w-full h-[1220px] md:h-[900px] md:w-[400px] border border-slate-300 rounded-md'>
+                                                                        <div className='relative w-full md:h-[900px] md:w-[400px] border border-slate-300 rounded-md'>
                                                                             <Bus5098 {...{ handleClickInformation }} />
                                                                         </div>
                                                                     </div>
@@ -1751,7 +1751,7 @@ export default function Eventos() {
                                                                         </AccordionSummary>
                                                                         <AccordionDetails>
                                                                             <div>
-                                                                                <div className='relative w-full h-[1220px] md:h-[900px] md:w-[400px] border-slate-300 rounded-md'>
+                                                                                <div className='relative w-full md:h-[900px] md:w-[400px] border-slate-300 rounded-md'>
                                                                                     <div className='scale-100 -mt-2 flex flex-col md:flex-row justify-start items-start gap-2'>
                                                                                         <div className='scale-100 -mt-2 flex justify-center items-center gap-2'>
                                                                                             <Circle className="h-5 w-5 bg-[#61baed] rounded-full" />
@@ -1791,7 +1791,7 @@ export default function Eventos() {
                                                                         </AccordionSummary>
                                                                         <AccordionDetails>
                                                                             <div>
-                                                                                <div className='relative w-full h-[1220px] md:h-[900px] md:w-[400px] border-slate-300 rounded-md'>
+                                                                                <div className='relative w-full md:h-[900px] md:w-[400px] border-slate-300 rounded-md'>
                                                                                     <div className='scale-100 -mt-2 flex flex-col md:flex-row justify-start items-start gap-2'>
                                                                                         <div className='scale-100 -mt-2 flex justify-center items-center gap-2'>
                                                                                             <Circle className="h-5 w-5 bg-[#61baed] rounded-full" />
@@ -1830,7 +1830,7 @@ export default function Eventos() {
                                                                         </AccordionSummary>
                                                                         <AccordionDetails>
                                                                             <div>
-                                                                                <div className='relative w-full h-[1220px] md:h-[900px] md:w-[400px] border-slate-300 rounded-md'>
+                                                                                <div className='relative w-full md:h-[900px] md:w-[400px] border-slate-300 rounded-md'>
                                                                                     <div className='scale-100 -mt-2 flex flex-col md:flex-row justify-start items-start gap-2'>
                                                                                         <div className='scale-100 -mt-2 flex justify-center items-center gap-2'>
                                                                                             <Circle className="h-5 w-5 bg-[#61baed] rounded-full" />
@@ -1869,7 +1869,7 @@ export default function Eventos() {
                                                                         </AccordionSummary>
                                                                         <AccordionDetails>
                                                                             <div>
-                                                                                <div className='relative w-full h-[1220px] md:h-[900px] md:w-[400px] border-slate-300 rounded-md'>
+                                                                                <div className='relative w-full md:h-[900px] md:w-[400px] border-slate-300 rounded-md'>
                                                                                     <div className='scale-100 -mt-2 flex flex-col md:flex-row justify-start items-start gap-2'>
                                                                                         <div className='scale-100 -mt-2 flex justify-center items-center gap-2'>
                                                                                             <Circle className="h-5 w-5 bg-[#61baed] rounded-full" />
