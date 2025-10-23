@@ -14,7 +14,7 @@ export const LoginForm = ({ handleSubmit, apiCall, onSubmit, getValues, setValue
   return (
     <div
       // id='fondo-oro-verde' 
-      className="w-full min-h-screen flex items-center justify-center !bg-oro-radial p-4 relative overflow-hidden bg-blue-500"
+      className="w-full min-h-screen flex items-center justify-center !bg-oro-radial p-4 relative overflow-hidden bg-[#1b70a2]"
     >
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -24,7 +24,7 @@ export const LoginForm = ({ handleSubmit, apiCall, onSubmit, getValues, setValue
       >
         <div
           // id='fondo-oro-verde' 
-          className="shadow-2xl rounded-lg overflow-hidden bg-blue-700"
+          className="shadow-2xl rounded-lg overflow-hidden bg-[#3a8db7]"
         >
           <div className="p-8 relative">
             <div className="text-center mb-8">
