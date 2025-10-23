@@ -1451,7 +1451,7 @@ export default function Eventos() {
                             // style={{ backgroundImage: "url('/fondopasajes (1).jpg')" }}
                             >
                                 <div className='flex flex-col justify-center items-center w-full md:w-full max-w-4xl gap-4'>
-                                    <div className='flex flex-col gap-1 justify-center items-center w-full bg-[rgba(0,0,255,0.8)] rounded-lg p-4 mb-2'>
+                                    <div className='flex flex-col gap-1 justify-center items-center w-full bg-[#3a8db7] rounded-lg p-4 mb-2'>
                                         <h1 className="text-center text-yellow-400 text-2xl font-bold">
                                             {`Reserva tu asiento`}
                                         </h1>
